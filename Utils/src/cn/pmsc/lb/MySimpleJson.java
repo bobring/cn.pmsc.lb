@@ -18,17 +18,9 @@ import net.sf.json.JSONArray;
  */
 public class MySimpleJson {
 	
-//	private static URL url = null;
 	private static JSONObject obj = new JSONObject();
 	private static JSONArray arr = new JSONArray();
 	
-//	public static JSONObject createJSON() {
-//		if(obj == null) {
-//			obj = new JSONObject();
-//		}
-//		
-//		return obj;
-//	}
 	
 	public static JSONObject getJSONObject() {
 		return obj;
@@ -46,6 +38,10 @@ public class MySimpleJson {
 		arr.element(job);
 	}
 	
+	public static void clear() {
+		obj.clear();
+		arr.clear();
+	}
 	
 	public static void PostJSON(URL url, Object post_obj) throws Exception {
 		HttpURLConnection connection = null;
@@ -83,7 +79,7 @@ public class MySimpleJson {
             connection.disconnect();
             
             //释放内存，清除已发送的JSON数据
-            obj.clear();
+            clear();
 		} catch (MalformedURLException e) {
             // TODO Auto-generated catch block
 //            e.printStackTrace();

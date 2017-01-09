@@ -149,13 +149,13 @@ public class Client {
 			//通过服务的协议调用提供的方法
 			List<String> files = fsp.listFilesByTop(100);
 			
-			List<String> maxfiles = fsp.listFilesByWarnId(fsp.getMaxWarnId());
-			
-			for(String a:maxfiles) {
-				String fileName = a.substring(0, a.lastIndexOf("_"));
-				files.add(fileName);
-				System.out.println("maxfiles: " + fileName);
-			}
+//			List<String> maxfiles = fsp.listFilesByWarnId(fsp.getMaxWarnId());
+//			
+//			for(String a:maxfiles) {
+//				String fileName = a.substring(0, a.lastIndexOf("_"));
+//				files.add(fileName);
+//				System.out.println("maxfiles: " + fileName);
+//			}
 			
 			num = files.size();
 			if(num != 0) {
@@ -168,7 +168,8 @@ public class Client {
 					
 					File file = new File(filepath);
 					if(file.isFile() && file.length() > 0) {
-						System.out.println("file already exists: " + fileName);
+						MyLog.info("file already exists: " + fileName);
+//						System.out.println("file already exists: " + fileName);
 					} else {
 						fileOutPutStream = new FileOutputStream(filepath);
 						returnhandler = fsp.download(fileName);
@@ -176,11 +177,13 @@ public class Client {
 						
 						fileOutPutStream.flush();
 						fileOutPutStream.close();
-						System.out.println("downloading file: " + fileName);
+						MyLog.info("downloading file: " + fileName);
+//						System.out.println("downloading file: " + fileName);
 					}
 				}
 			} else {
-				System.out.println("no zip files founded.");
+				MyLog.info("no zip files founded.");
+//				System.out.println("no zip files founded.");
 			}
 			
 			return num;
@@ -422,9 +425,9 @@ public class Client {
     	
 //    	Client.wsdemo_downloadzipfiles("F:\\temp\\data", new URL("http://10.0.65.169:8080/WarningFileShare/WarnFileService?wsdl"));
     	
-    	if (args.length < 2) {
+    	if (args.length < 5) {
 			throw new NullPointerException(
-					"enter the program cfgfile and the log4j cfgfile");
+					"enter the program cfgfile, the log4j cfgfile, the logfile, business id and process id");
 		}
     	
     	String program_cfgfile = args[0];
@@ -441,6 +444,20 @@ public class Client {
     	} catch(Exception e) {
     		System.out.println("error happened while reading program cfgfile: " + program_cfgfile);
     		throw new RuntimeException(e); 
+    	}
+    	
+    	MyLog.set_business_id(args[3]);
+		MyLog.set_process_id(args[4]);
+		
+    	try {
+    		System.setProperty("warncap_logpath", args[2]); //设置日志输出路径
+    		System.out.println(System.getProperty("warncap_logpath").toString());
+    		MyLog.load_log4jcfg(log4j_cfgfile);
+//    		MyLog.userdefine_prop("appender.I.fileName", args[2]);
+//    		MyLog.userdefine_prop("appender.E.fileName", args[2]);
+//    		MyLog.flush();
+    	} catch(Exception e) {
+    		System.out.println("error happened while reading log4j cfgfile: " + log4j_cfgfile);
     	}
     	
     	int file_count = 0;
