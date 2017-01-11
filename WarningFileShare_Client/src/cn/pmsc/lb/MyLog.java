@@ -2,12 +2,17 @@ package cn.pmsc.lb;
 
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+//import java.io.BufferedReader;
+//import java.io.FileNotFoundException;
+//import java.io.FileReader;
+//import java.io.IOException;
 import java.util.Properties;
 
+//import org.apache.log4j.LogManager;
+//import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
@@ -45,11 +50,12 @@ public class MyLog {
 		
 		BufferedReader buff = null;
 		try {
-			Properties props = new Properties();
+//			PropertyConfigurator.configure(filepath);
+//			Properties props = new Properties();
 //			FileInputStream log4jStream = new FileInputStream(filepath);
 //            props.load(log4jStream);
 //            log4jStream.close();
-            PropertyConfigurator.configure(props); //装入log4j配置信息
+//            PropertyConfigurator.configure(props); //装入log4j配置信息
 			buff = new BufferedReader(new FileReader(filepath));
 			props.load(buff);
         	buff.close();
@@ -65,11 +71,9 @@ public class MyLog {
 	}
 	
 	public static void userdefine_prop(String key, Object value) {
-//		PropertySetter pst = new PropertySetter();
-		
-//		System.out.println("before changed, key:" + key + " value:" + props.getProperty(key));
-//		props.setProperty(key, value.toString());
-//		System.out.println("after changed, key:" + key + " value:" + props.getProperty(key));
+		System.out.println("before changed, key:" + key + " value:" + props.getProperty(key));
+		props.setProperty(key, value.toString());
+		System.out.println("after changed, key:" + key + " value:" + props.getProperty(key));
 	}
 	
 //	public static void show() {

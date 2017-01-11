@@ -43,7 +43,7 @@ public class MySimpleJson {
 		arr.clear();
 	}
 	
-	public static void PostJSON(URL url, Object post_obj) throws Exception {
+	public static String PostJSON(URL url, Object post_obj) throws Exception {
 		HttpURLConnection connection = null;
 		try {
 			//创建连接
@@ -80,6 +80,8 @@ public class MySimpleJson {
             
             //释放内存，清除已发送的JSON数据
             clear();
+            
+            return sb.toString();
 		} catch (MalformedURLException e) {
             // TODO Auto-generated catch block
 //            e.printStackTrace();

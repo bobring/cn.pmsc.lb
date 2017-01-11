@@ -9,7 +9,8 @@ public class MyTime {
 		return new Date();
 	}
 	
-	public static String get_timeformat(SimpleDateFormat sdf) {
+	public static String get_timeformat(String regex) {
+		SimpleDateFormat sdf = new SimpleDateFormat(regex);
 		return sdf.format(new Date());
 	}
 	
