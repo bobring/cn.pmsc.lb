@@ -2,12 +2,9 @@
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -17,7 +14,7 @@ import javax.activation.DataHandler;
 import com.pmsc.warning.client.*; 
 import cn.pmsc.lb.*;
 import net.sf.json.JSONObject;
-
+import net.sf.json.JSONArray;
 
 public class Client {  
 	
@@ -353,39 +350,43 @@ public class Client {
 	
 	
 	public static Object warncaptoJSON(WarnCap wc) {
-		MySimpleJson.insertJSONElement("alertid", wc.getIdentifier());
-		MySimpleJson.insertJSONElement("sender", wc.getSender());
-		MySimpleJson.insertJSONElement("status", wc.getMsgType());
-		MySimpleJson.insertJSONElement("referid", wc.getReferencesInfo());
-		MySimpleJson.insertJSONElement("eventcode", wc.getEventType());
-		MySimpleJson.insertJSONElement("eventname", wc.getEventTypeCN());
-		MySimpleJson.insertJSONElement("level", wc.getSeverity());
-		MySimpleJson.insertJSONElement("title", wc.getHeadline());
-		MySimpleJson.insertJSONElement("content", wc.getDescription());
-		MySimpleJson.insertJSONElement("cancelinfo", wc.getNote());
-		MySimpleJson.insertJSONElement("begintime", wc.getEffective());
-		MySimpleJson.insertJSONElement("endtime", wc.getExpires());
+		JSONObject job = new JSONObject();
 		
-		return MySimpleJson.getJSONObject();
+		job.put("alertid", wc.getIdentifier());
+		job.put("sender", wc.getSender());
+		job.put("status", wc.getMsgType());
+		job.put("referid", wc.getReferencesInfo());
+		job.put("eventcode", wc.getEventType());
+		job.put("eventname", wc.getEventTypeCN());
+		job.put("level", wc.getSeverity());
+		job.put("title", wc.getHeadline());
+		job.put("content", wc.getDescription());
+		job.put("cancelinfo", wc.getNote());
+		job.put("begintime", wc.getEffective());
+		job.put("endtime", wc.getExpires());
+		
+		return job;
 	}
 	
 	
 	/**
-	 * 读取预警服务接口
-	 * 返回最近10分钟内的预警数据并写入公服接口
-	 * @return List<WarnCap>，返回值为WarnCap类型的序列
+	 * 将预警信息以json格式写入数据接口
 	 */
-	public static void wsdemo_warncapToDB(URL source_url, URL dest_url) throws Exception {
+	public static void wsdemo_warncapToDB(List<WarnCap> files, URL dest_url) throws Exception {
+		JSONArray array = null;
 		
 		try {
-			//取得10分钟内的warncap数据
-			List<WarnCap> files = wsdemo_getwarncaplist(source_url);
-			
 			if(files.size() > 1) {
+				array = new JSONArray();
+				
 				for(WarnCap a:files) {
-					MySimpleJson.insertJSONObject((JSONObject) warncaptoJSON(a));
+					array.add(warncaptoJSON(a));
+//					MySimpleJson.insertJSONObject((JSONObject) warncaptoJSON(a));
 				}
-				MySimpleJson.PostJSON(dest_url, MySimpleJson.getJSONArray());
+				System.out.println(array.toString());
+				MySimpleJson.PostJSON(dest_url, array);
+//				System.out.println(MySimpleJson.getJSONArray().toString());
+//				MySimpleJson.PostJSON(dest_url, MySimpleJson.getJSONArray());
 			} else if(files.size() == 1) {
 				for(WarnCap a:files) {
 					MySimpleJson.PostJSON(dest_url, warncaptoJSON(a));
@@ -497,7 +498,6 @@ public class Client {
      * @param args
      * @throws Exception
      */
-    @SuppressWarnings("unchecked")
 	public static void main(String[] args) throws Exception {
     	
     	
