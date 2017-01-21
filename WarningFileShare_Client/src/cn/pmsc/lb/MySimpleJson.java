@@ -4,10 +4,13 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
+import java.util.Map;
 
 import net.sf.json.JSONObject;
 import net.sf.json.JSONArray;
@@ -82,14 +85,27 @@ public class MySimpleJson {
 	        connection.setInstanceFollowRedirects(true);
 	        connection.setRequestProperty("Content-Type", 
 	        		"application/json;charset=utf-8");
+	        
 	        connection.connect();
 	        
-	      //POST请求
-	        DataOutputStream out = new DataOutputStream(
-                    connection.getOutputStream());
-            out.writeBytes(post_obj.toString());
+	        
+//	        String post_str = MyCharEncoding.setEncoding(post_obj.toString(), "UTF-8");
+            
+	        //POST请求
+	        OutputStreamWriter out = new OutputStreamWriter(
+                    connection.getOutputStream(), "UTF-8");
+            out.append(post_obj.toString());
             out.flush();
             out.close();
+            
+            //打印响应头信息
+	        Map<String, List<String>> map = connection.getHeaderFields();
+	        
+	        System.out.println("显示响应Header信息...\n");
+            for (Map.Entry<String, List<String>> entry : map.entrySet()) {
+                    System.out.println("Key : " + entry.getKey() + 
+                                       " ,Value : " + entry.getValue());
+            }
 
             //读取响应
             BufferedReader reader = new BufferedReader(new InputStreamReader(
