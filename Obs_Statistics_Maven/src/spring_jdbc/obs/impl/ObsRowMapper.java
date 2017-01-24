@@ -12,7 +12,7 @@ public class ObsRowMapper implements RowMapper<Obs>{
 	public Obs mapRow(ResultSet rs, int index) throws SQLException {
 		Obs obs = new Obs();
 		obs.setId(rs.getString("id"));
-		obs.setDate(rs.getDate("date"));
+		obs.setDate(rs.getDate("dtime"));
 		obs.setStatistics(rs.getBytes("statistics"));
 		return obs;
 	}

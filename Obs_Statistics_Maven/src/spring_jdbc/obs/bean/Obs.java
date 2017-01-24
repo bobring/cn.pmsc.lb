@@ -3,9 +3,9 @@ package spring_jdbc.obs.bean;
 import java.sql.Date;
 
 public class Obs {
-	private String id;
-	private Date date;
-	private byte[] statistics;
+	protected String id;
+	protected Date dtime;
+	protected byte[] statistics;
 	
 //	public Obs(){}
 	
@@ -19,15 +19,28 @@ public class Obs {
 		this.id = id;
 	}
 	public Date getDate() {
-		return date;
+		return dtime;
 	}
 	public void setDate(Date date) {
-		this.date = date;
+		this.dtime = date;
+	}
+	public void setDate(String str) {
+//		this.dtime = Date.valueOf("2005-12-12");
+		this.dtime = Date.valueOf(str);
 	}
 	public byte[] getStatistics() {
 		return statistics;
 	}
 	public void setStatistics(byte[] statistics) {
 		this.statistics = statistics;
+	}
+	public void setStatistics(String str) {
+		byte[] bytes = new byte[str.length()];
+		int i;
+		
+		for(i = 0; i < str.length(); i++) {
+			bytes[i] = Byte.parseByte(Character.toString(str.charAt(i)));
+		}
+		this.statistics = bytes;
 	}
 }

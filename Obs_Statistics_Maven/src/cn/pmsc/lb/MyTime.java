@@ -9,6 +9,10 @@ public class MyTime {
 		return new Date();
 	}
 	
+	/**
+	 * @param regex, 时间格式正则表达式
+	 * @return 返回所需格式的当前时间
+	 */
 	public static String get_timeformat(String regex) {
 		SimpleDateFormat sdf = new SimpleDateFormat(regex);
 		return sdf.format(new Date());

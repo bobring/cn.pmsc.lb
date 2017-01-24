@@ -21,41 +21,50 @@ private JdbcTemplate jdbcTemplate;
 	}
 	
 	@Override
-	public void delete(String id, Date date) {
+	public int delete(String id, Date date) {
 //		jdbcTemplate.update("delete from person where id=?", new Object[]{id},
 //				new int[]{java.sql.Types.INTEGER});
-		jdbcTemplate.update("delete from obs where id=? and date=?", new Object[]{id, date});
+		return jdbcTemplate.update("delete from OBS.STATISTICS where id=? and dtime=?", new Object[]{id, date});
 	}
 
 	@Override
-	public void save(Obs obs) {
+	public int insert(Obs obs) {
 		// TODO Auto-generated method stub
-		
+		return jdbcTemplate.update("insert into OBS.STATISTICS(id, dtime, statistics) value(?, ?, ?)", 
+				new Object[]{obs.getId(), obs.getDate(), obs.getStatistics()});
 	}
 
 	@Override
-	public void update(Obs obs) {
+	public int update(Obs obs) {
 		// TODO Auto-generated method stub
-		
+		return jdbcTemplate.update("update OBS.STATISTICS set statistics=? where id=? and dtime=?", 
+				new Object[]{obs.getStatistics(), obs.getId(), obs.getDate()});
 	}
 
 	@Override
-	public Obs getObs(String id, Date date) {
+	public List<Obs> getObss(String id, Date date) {
 		// TODO Auto-generated method stub
-		return (Obs)jdbcTemplate.query("select * from obs where id=? and date=?", 
+		return (List<Obs>)jdbcTemplate.query("select * from OBS.STATISTICS where id=? and dtime=?", 
 				new Object[]{id, date}, new ObsRowMapper());
 	}
 
 	@Override
 	public List<Obs> getObss(Date date) {
 		// TODO Auto-generated method stub
-		return (List<Obs>)jdbcTemplate.query("select * from obs where date=?", 
+		return (List<Obs>)jdbcTemplate.query("select * from OBS.STATISTICS where dtime=?", 
 				new Object[]{date}, new ObsRowMapper());
 	}
 
 	@Override
 	public List<Obs> getAllObss() {
 		// TODO Auto-generated method stub
-		return (List<Obs>)jdbcTemplate.query("select * from obs", new ObsRowMapper());
+		return (List<Obs>)jdbcTemplate.query("select * from OBS.STATISTICS", new ObsRowMapper());
+	}
+
+	@Override
+	public List<Obs> getObss(String id) {
+		// TODO Auto-generated method stub
+		return (List<Obs>)jdbcTemplate.query("select * from OBS.STATISTICS where id=?", 
+				new Object[]{id}, new ObsRowMapper());
 	}
 }
