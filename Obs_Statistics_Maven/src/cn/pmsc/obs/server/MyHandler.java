@@ -2,7 +2,6 @@ package cn.pmsc.obs.server;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -22,13 +21,14 @@ import spring_jdbc.obs.impl.MyObsImpl;
 @SuppressWarnings("restriction")
 public class MyHandler implements HttpHandler {
 	
-	public void JsonToDB(String str) {
+	public String JsonToDB(String str) {
 		int i, j;
+		StringBuffer buf = new StringBuffer();
 		
 		JSONArray arr = JSONArray.fromObject(str);
 		JSONObject job = null;
 		
-		for(i = 0; i < arr.size(); i++) {
+		for(i = 0, j = 0; i < arr.size(); i++) {
 			job = arr.getJSONObject(i);
 			
 			if(job.has("id") && job.has("dtime") && job.has("statistics")) {
@@ -37,86 +37,90 @@ public class MyHandler implements HttpHandler {
 				obs.setDate(job.getString("dtime"));
 				obs.setStatistics(job.getString("statistics"));
 				
-				if(MyObsImpl.obsService.getObss(obs.getId(), obs.getDate()).size() == 0) {
-					j = MyObsImpl.obsService.insert(obs);
+				Obs rs = MyObsImpl.obsService.getObs(obs.getId(), obs.getDate());
+				
+				if(rs.equals(obs)) {
+					buf.append("data already exists in DB: " + obs.toString() + System.lineSeparator());
+				} else if(rs.same(obs)) {
+					j += MyObsImpl.obsService.update(obs);
+					buf.append("update data in DB, old: " + rs.toString() + 
+							"; new: " + obs.toString() + System.lineSeparator());
 				} else {
-					j = MyObsImpl.obsService.update(obs);
+					j += MyObsImpl.obsService.insert(obs);
+					buf.append("insert data to DB: " + obs.toString() + System.lineSeparator());
 				}
 			} else {
-				System.out.println("unknown json object: " + job.toString());
+				buf.append("unknown json object: " + job.toString() + System.lineSeparator());
 			}
 		}
+		buf.append(j + " lines effected in DB. " + System.lineSeparator());
+		
+		return buf.toString();
 	}
 	
 	@Override
 	public void handle(HttpExchange exchange) throws IOException {
 		// TODO Auto-generated method stub
-		String requestMethod = exchange.getRequestMethod();
-		Headers responseHeaders = null;
-		Headers requestHeaders = null;
 		String str = null;
+		StringBuffer json_buf = new StringBuffer();
 		StringBuffer buf = new StringBuffer();
 		
-		if (requestMethod.equalsIgnoreCase("POST")) {
-			responseHeaders = exchange.getResponseHeaders();
-//			responseHeaders.set("Content-Type", "text/plain");
-			responseHeaders.set("Content-Type", "text/html; charset=utf-8");
-			exchange.sendResponseHeaders(200, 0);
-			
-			OutputStreamWriter responseBody = new OutputStreamWriter(
-					exchange.getResponseBody(), "UTF-8");
-//			OutputStream responseBody = exchange.getResponseBody();
-			requestHeaders = exchange.getRequestHeaders();
-			Set<String> keySet = requestHeaders.keySet();
+		exchange.sendResponseHeaders(200, 0);
+		OutputStream responseBody = exchange.getResponseBody();
+		
+		String requestMethod = exchange.getRequestMethod();
+//			responseHeaders.set("Content-Type", "text/plain");		
+		Headers responseHeaders = exchange.getResponseHeaders();
+		responseHeaders.set("Content-Type", "text/html; charset=utf-8");
+		
+		
+		Headers requestHeaders = exchange.getRequestHeaders();
+		Set<String> keySet = requestHeaders.keySet();
 			Iterator<String> iter = keySet.iterator();
 			while (iter.hasNext()) {
 				String key = iter.next();
 				List<String> values = requestHeaders.get(key);
-				String s = key + " = " + values.toString() + "\n";
+				String s = key + " = " + values.toString() + System.lineSeparator();
 //				responseBody.write(s.getBytes());
-				responseBody.append(s);
+//				responseBody.write(s);
+				System.out.println(s);
+				buf.append(s);
 			}
 //			responseBody.write("jdk自带轻量级http server例子".getBytes());
-			responseBody.append("jdk自带轻量级http server例子");
+//			responseBody.write("jdk自带轻量级http server例子");
+			buf.append("jdk自带轻量级http server例子" + System.lineSeparator());
 			
+		if (requestMethod.equalsIgnoreCase("POST")) {
 			InputStreamReader in = new InputStreamReader(exchange.getRequestBody());
 			BufferedReader br = new BufferedReader(in);
 			
 			while((str = br.readLine()) != null) {
-				buf.append(str);
+				System.out.println(str);
+				json_buf.append(str);
 			}
 			
-			JsonToDB(buf.toString());
+			try {
+				buf.append(JsonToDB(json_buf.toString()) + System.lineSeparator());
+				System.out.println(buf.toString());
+			} catch (Throwable a) {
+				System.out.println(a.toString());
+			}
 			
-			responseBody.close();
+			
+//			exchange.sendResponseHeaders(200, buf.toString().getBytes().length);
+			
+			
+			responseBody.write(buf.toString().getBytes());
+			
 		} else if(requestMethod.equalsIgnoreCase("GET")) {
-			responseHeaders = exchange.getResponseHeaders();
-//			responseHeaders.set("Content-Type", "text/plain");
-			responseHeaders.set("Content-Type", "text/html; charset=utf-8");
-			exchange.sendResponseHeaders(200, 0);
-			
-			OutputStreamWriter responseBody = new OutputStreamWriter(
-					exchange.getResponseBody(), "UTF-8");
-//			OutputStream responseBody = exchange.getResponseBody();
-			requestHeaders = exchange.getRequestHeaders();
-			Set<String> keySet = requestHeaders.keySet();
-			Iterator<String> iter = keySet.iterator();
-			while (iter.hasNext()) {
-				String key = iter.next();
-				List values = requestHeaders.get(key);
-				String s = key + " = " + values.toString() + "\n";
-//				responseBody.write(s.getBytes());
-				responseBody.append(s);
-			}
-//			responseBody.write("jdk自带轻量级http server例子".getBytes());
-			responseBody.append("jdk自带轻量级http server例子");
-			
-			
-			
-			responseBody.close();
-		} else {
-			System.out.println("Invalid http request method: " + requestMethod);
-		}
-	}
+//			responseBody.append("jdk自带轻量级http server例子");
 
+		} else {
+			responseBody.write(("Invalid http request method: " + requestMethod).getBytes());
+		}
+//		responseBody.flush();
+		responseBody.close();
+		
+//		exchange.close();
+	}
 }

@@ -17,6 +17,7 @@ import java.util.concurrent.Executors;
 
 public class HttpServerDemo {
 
+	@SuppressWarnings("restriction")
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		if (args.length < 1) {

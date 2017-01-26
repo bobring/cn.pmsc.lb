@@ -42,9 +42,9 @@ private JdbcTemplate jdbcTemplate;
 	}
 
 	@Override
-	public List<Obs> getObss(String id, Date date) {
+	public Obs getObs(String id, Date date) {
 		// TODO Auto-generated method stub
-		return (List<Obs>)jdbcTemplate.query("select * from OBS.STATISTICS where id=? and dtime=?", 
+		return (Obs)jdbcTemplate.query("select * from OBS.STATISTICS where id=? and dtime=?", 
 				new Object[]{id, date}, new ObsRowMapper());
 	}
 

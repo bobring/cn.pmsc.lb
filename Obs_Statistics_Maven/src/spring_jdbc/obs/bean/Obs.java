@@ -1,6 +1,7 @@
 package spring_jdbc.obs.bean;
 
 import java.sql.Date;
+import java.util.Arrays;
 
 public class Obs {
 	protected String id;
@@ -42,5 +43,17 @@ public class Obs {
 			bytes[i] = Byte.parseByte(Character.toString(str.charAt(i)));
 		}
 		this.statistics = bytes;
+	}
+	public boolean same(Obs b) {
+		if(b.getId().equals(this.id) && b.getDate().equals(this.dtime)) {
+			return true;
+		}
+		return false;
+	}
+	public boolean equals(Obs b) {
+		if(this.same(b) && Arrays.equals(this.statistics, b.getStatistics())) {
+			return true;
+		}
+		return false;
 	}
 }
