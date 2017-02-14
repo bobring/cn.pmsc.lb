@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>SunRiseSunSet</name>
+	<comment></comment>
+	<projects>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>org.eclipse.jdt.core.javabuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>org.eclipse.jdt.core.javanature</nature>
+	</natures>
+	<linkedResources>
+		<link>
+			<name>src/lb/time/sunrisesunset/ReadXML.java</name>
+			<type>1</type>
+			<location>E:/OneDrive/程序代码/SunriseSunset/ReadXML.java</location>
+		</link>
+		<link>
+			<name>src/lb/time/sunrisesunset/richuriluo.java</name>
+			<type>1</type>
+			<location>E:/OneDrive/程序代码/SunriseSunset/richuriluo.java</location>
+		</link>
+	</linkedResources>
+</projectDescription>

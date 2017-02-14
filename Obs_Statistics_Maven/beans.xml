@@ -14,8 +14,8 @@
   </bean>
  
   <!-- Definition for studentJDBCTemplate bean -->
-  <bean id="obsJDBCTemplate"
-   class="spring_jdbc.obs.impl.ObsServiceBean">
+  <bean id="StaServiceBean"
+   class="spring_jdbc.obs.impl.StaServiceBean">
    <property name="dataSource" ref="dataSource" />  
   </bean>
     
