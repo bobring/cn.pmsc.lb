@@ -26,6 +26,8 @@ public class KafkaProducer
         props.put("serializer.class", "kafka.serializer.StringEncoder");
         //配置key的序列化类
         props.put("key.serializer.class", "kafka.serializer.StringEncoder");
+        
+        props.put("request.required.acks", "-1");
 
         /**
          * 用来控制一个produce请求怎样才能算完成，准确的说，是有多少broker必须已经提交数据到log文件，并向leader发送ack，可以设置如下的值：

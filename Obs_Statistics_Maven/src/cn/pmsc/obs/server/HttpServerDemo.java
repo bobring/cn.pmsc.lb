@@ -15,6 +15,9 @@ import java.util.List;
 import java.util.Set;  
 import java.util.concurrent.Executors;
 
+import org.springframework.beans.BeansException;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
 public class HttpServerDemo {
 
 	@SuppressWarnings("restriction")
@@ -27,6 +30,8 @@ public class HttpServerDemo {
 		
 		int port = -1;
 		
+		ClassPathXmlApplicationContext context;
+		
 		try {
 			URL url = new URL(args[0]);
 			
@@ -38,8 +43,9 @@ public class HttpServerDemo {
 			InetSocketAddress addr = new InetSocketAddress(port);
 			HttpServer server = HttpServer.create(addr, 0);
 			
+			context = new ClassPathXmlApplicationContext("Beans.xml");
 			//server.createContext("/server", new MyHandler());
-			server.createContext(url.getPath(), new MyHandler());
+			server.createContext(url.getPath(), new MyHandler(context));
 			server.setExecutor(Executors.newCachedThreadPool());
 			server.start();
 			System.out.println("Server is listening on port: " + port);
@@ -49,6 +55,8 @@ public class HttpServerDemo {
 			e1.printStackTrace();
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
+		} catch (BeansException e) {
+			e.printStackTrace();
 		}
 		
 	}

@@ -67,12 +67,20 @@ public class Sta {
 	public void setCount(long count) {
 		this.count = count;
 	}
+	/**
+	 * 比较两条记录是不是同一个
+	 * 用于避免重复插入同一数据
+	 */
 	public boolean same(Sta b) {
 		if(TimestampEquals(this.datatime, b.getDatatime()) && TimestampEquals(this.checktime, b.getchecktime())) {
 			return true;
 		}
 		return false;
 	}
+	/**
+	 * 比较两条记录的内容是否相同
+	 * 由于内容值可能会较大，为节省计算资源，应尽量使用same方法，根据业务逻辑，一般也没必要使用equals方法
+	 */
 	public boolean equals(Sta b) {
 		String[] array_a = null;
 		String[] array_b = null;

@@ -18,7 +18,6 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.util.JSONTokener;
 import spring_jdbc.obs.bean.Sta;
-import spring_jdbc.obs.impl.MyStaImpl;
 import spring_jdbc.obs.impl.StaServiceBean;
 
 @SuppressWarnings("restriction")
@@ -27,6 +26,10 @@ public class MyHandler implements HttpHandler {
 	private static int EffectedLines = 0; //统计每次请求过程中数据库写入行数，仅用于WriteDB函数，并在handle函数中初始化为零
 	private ClassPathXmlApplicationContext context;
 	
+	public MyHandler(ClassPathXmlApplicationContext ctx) {
+		this.context = ctx;
+	}
+
 	public String WriteDB(JSONObject job) {
 		StringBuffer buf = new StringBuffer();
 		int j = 0;
@@ -60,14 +63,14 @@ public class MyHandler implements HttpHandler {
 			try {
 				sta.setDatatime(job.getString("datatime"));
 			} catch(IllegalArgumentException e) {
-				buf.append("illegal time format, like yyyy-mm-dd HH:MM:SS, datatime: " + job.getString("datatime").toString() + System.lineSeparator());
+				buf.append("illegal time format, like yyyy-mm-dd HH:MM:SS, error: " + job.getString("datatime").toString() + System.lineSeparator());
 				return buf.toString();
 			}
 			
 			try {
 				sta.setchecktime(job.getString("checktime"));
 			} catch(IllegalArgumentException e) {
-				buf.append("illegal time format, like yyyy-mm-dd HH:MM:SS, checktime: " + job.getString("checktime").toString() + System.lineSeparator());
+				buf.append("illegal time format, like yyyy-mm-dd HH:MM:SS, error: " + job.getString("checktime").toString() + System.lineSeparator());
 				return buf.toString();
 			}
 			
@@ -76,7 +79,7 @@ public class MyHandler implements HttpHandler {
 			
 //			Sta rs = MyStaImpl.staService.getSta(sta.getDatatime(), sta.getchecktime());
 			
-			context = new ClassPathXmlApplicationContext("Beans.xml");
+//			context = new ClassPathXmlApplicationContext("Beans.xml");
 			StaServiceBean staService = (StaServiceBean)context.getBean("StaServiceBean");
 			
 			List<Sta> rs = staService.getSta(sta.getDatatime(), sta.getchecktime());
@@ -84,16 +87,16 @@ public class MyHandler implements HttpHandler {
 			if(rs.size() == 1) {
 				b = rs.get(0);
 				
-				if(b.equals(sta)) {
+				if(b.same(sta)) {
 					buf.append("data already exists in DB: " + sta.toString() + System.lineSeparator());
 				} else {
-					j += MyStaImpl.staService.update(sta);
+					j += staService.update(sta);
 					buf.append("update data in DB, " + System.lineSeparator() + 
 							" old: " + b.toString() + System.lineSeparator() + 
 							" new: " + sta.toString()  + System.lineSeparator());
 				}
 			} else if(rs.size() == 0) {
-				j += MyStaImpl.staService.insert(sta);
+				j += staService.insert(sta);
 				buf.append("insert data to DB: " + sta.toString() + System.lineSeparator());
 			} else {
 				buf.append("DB error, expect no more than 1, but " + rs.size() + 
