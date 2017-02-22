@@ -18,10 +18,7 @@
     http://cxf.apache.org/schemas/jaxws.xsd  
     ">  
   
-    <aop:aspectj-autoproxy proxy-target-class="true" />  
-  
-
-  
+    <aop:aspectj-autoproxy proxy-target-class="true" />
     
     <jaxws:client id="client" serviceClass="com.pmsc.warning.client.FileShare"   
         address="http://fabu.12379.gov.cn:8080/WarningFileShare/WarnFileService">  

@@ -10,5 +10,9 @@
 	<classpathentry exported="true" kind="lib" path="F:/temp/code/jars/JSON/json-lib-2.4-jdk15.jar"/>
 	<classpathentry exported="true" kind="lib" path="F:/temp/code/jars/JSON/commons-lang-2.6.jar"/>
 	<classpathentry exported="true" kind="lib" path="F:/temp/code/jars/JSON/commons-collections-3.2.2.jar"/>
+	<classpathentry kind="lib" path="F:/temp/code/jars/ApacheCxf/cxf-2.7.18.jar"/>
+	<classpathentry kind="lib" path="F:/temp/code/jars/repository/org/springframework/spring-context/4.2.2.RELEASE/spring-context-4.2.2.RELEASE.jar"/>
+	<classpathentry kind="lib" path="F:/temp/code/jars/repository/org/springframework/spring-beans/4.2.2.RELEASE/spring-beans-4.2.2.RELEASE.jar"/>
+	<classpathentry kind="lib" path="F:/temp/code/jars/repository/org/springframework/spring-core/4.2.2.RELEASE/spring-core-4.2.2.RELEASE.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -1,4 +1,4 @@
- package com.pmsc.warning.test;
+package com.pmsc.warning.test;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -11,7 +11,7 @@ import java.util.List;
 
 import javax.activation.DataHandler;
 
-import com.pmsc.warning.client.*; 
+import com.pmsc.warning.service.*; 
 import cn.pmsc.lb.*;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONArray;

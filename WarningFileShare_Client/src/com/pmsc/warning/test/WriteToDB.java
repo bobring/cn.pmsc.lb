@@ -4,7 +4,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
-import com.pmsc.warning.client.WarnCap;
+import com.pmsc.warning.service.WarnCap;
 
 import cn.pmsc.lb.MyLog;
 import cn.pmsc.lb.MyProperties;

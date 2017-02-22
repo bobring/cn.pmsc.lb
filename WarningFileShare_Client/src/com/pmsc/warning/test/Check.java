@@ -9,9 +9,9 @@ import java.util.List;
 
 import javax.activation.DataHandler;
 
-import com.pmsc.warning.client.FileShare;
-import com.pmsc.warning.client.FileShareService;
-import com.pmsc.warning.client.WarnCap;
+import com.pmsc.warning.service.FileShare;
+import com.pmsc.warning.service.FileShareService;
+import com.pmsc.warning.service.WarnCap;
 
 import cn.pmsc.lb.*;
 
