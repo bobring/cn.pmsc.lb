@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -153,6 +154,7 @@ public class MyHandler implements HttpHandler {
 		Headers responseHeaders = exchange.getResponseHeaders();
 		responseHeaders.set("Content-Type", "text/html; charset=utf-8");
 		
+		exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
 		
 		Headers requestHeaders = exchange.getRequestHeaders();
 		Set<String> keySet = requestHeaders.keySet();

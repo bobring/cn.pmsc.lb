@@ -1,5 +1,0 @@
-服务器端代码生成
-第一步 :新建java项目名称:WarningFileShare_Client
-                示例中项目地址:G:\workspace-wuyufei\warninfo\WarningFileShare_Client
-第二步: 打开cmd命令行,转换目录到项目地址目录下的src目录下,如下:cd G:\workspace-wuyufei\warninfo\WarningFileShare_Client\src
-第三步: 输入: wsdl2java -frontend jaxws21 -p com.pmsc.warning.client http://fabu.12379.gov.cn:8080/WarningFileShare/WarnFileService?wsdl
