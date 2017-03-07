@@ -1,0 +1,78 @@
+20170307191520--ERROR--upload(Map<String,String>) - e=java.lang.IllegalArgumentException: The bucket name "WarnCap" is invalid. A bucket name must: 1) be comprised of lower-case characters, numbers or dash(-); 2) start with lower case or numbers; 3) be between 3-63 characters long. 
+java.lang.IllegalArgumentException: The bucket name "WarnCap" is invalid. A bucket name must: 1) be comprised of lower-case characters, numbers or dash(-); 2) start with lower case or numbers; 3) be between 3-63 characters long. 
+	at com.aliyun.oss.internal.OSSUtils.ensureBucketNameValid(OSSUtils.java:75)
+	at com.aliyun.oss.internal.OSSBucketOperation.createBucket(OSSBucketOperation.java:151)
+	at com.aliyun.oss.OSSClient.createBucket(OSSClient.java:400)
+	at com.aliyun.oss.OSSClient.createBucket(OSSClient.java:394)
+	at aliyun.oss.TestOSS.ensureBucket(TestOSS.java:214)
+	at aliyun.oss.TestOSS.upload(TestOSS.java:172)
+	at aliyun.oss.PutFiles.main(PutFiles.java:79)
+20170307191520--INFO--main(String[]) - file sum=0
+20170307192056--ERROR--upload(Map<String,String>) - e=java.lang.IllegalArgumentException: The bucket name "WarnCap" is invalid. A bucket name must: 1) be comprised of lower-case characters, numbers or dash(-); 2) start with lower case or numbers; 3) be between 3-63 characters long. 
+java.lang.IllegalArgumentException: The bucket name "WarnCap" is invalid. A bucket name must: 1) be comprised of lower-case characters, numbers or dash(-); 2) start with lower case or numbers; 3) be between 3-63 characters long. 
+	at com.aliyun.oss.internal.OSSUtils.ensureBucketNameValid(OSSUtils.java:75)
+	at com.aliyun.oss.internal.OSSBucketOperation.createBucket(OSSBucketOperation.java:151)
+	at com.aliyun.oss.OSSClient.createBucket(OSSClient.java:400)
+	at com.aliyun.oss.OSSClient.createBucket(OSSClient.java:394)
+	at aliyun.oss.TestOSS.ensureBucket(TestOSS.java:214)
+	at aliyun.oss.TestOSS.upload(TestOSS.java:172)
+	at aliyun.oss.PutFiles.main(PutFiles.java:79)
+20170307192056--INFO--main(String[]) - file sum=0
+20170307192113--WARN--[Server]Unable to execute HTTP request: The OSS Access Key Id you provided does not exist in our records.
+[ErrorCode]: InvalidAccessKeyId
+[RequestId]: 58BE97934F29D06C384A5A46
+[HostId]: warncap.oss-cn-beijing.aliyuncs.com
+[ResponseError]:
+<?xml version="1.0" encoding="UTF-8"?>
+<Error>
+  <Code>InvalidAccessKeyId</Code>
+  <Message>The OSS Access Key Id you provided does not exist in our records.</Message>
+  <RequestId>58BE97934F29D06C384A5A46</RequestId>
+  <HostId>warncap.oss-cn-beijing.aliyuncs.com</HostId>
+  <OSSAccessKeyId>DEBUG</OSSAccessKeyId>
+</Error>
+
+20170307192113--ERROR--upload(Map<String,String>) - e=com.aliyun.oss.OSSException: The OSS Access Key Id you provided does not exist in our records.
+[ErrorCode]: InvalidAccessKeyId
+[RequestId]: 58BE97934F29D06C384A5A46
+[HostId]: warncap.oss-cn-beijing.aliyuncs.com
+[ResponseError]:
+<?xml version="1.0" encoding="UTF-8"?>
+<Error>
+  <Code>InvalidAccessKeyId</Code>
+  <Message>The OSS Access Key Id you provided does not exist in our records.</Message>
+  <RequestId>58BE97934F29D06C384A5A46</RequestId>
+  <HostId>warncap.oss-cn-beijing.aliyuncs.com</HostId>
+  <OSSAccessKeyId>DEBUG</OSSAccessKeyId>
+</Error>
+
+com.aliyun.oss.OSSException: The OSS Access Key Id you provided does not exist in our records.
+[ErrorCode]: InvalidAccessKeyId
+[RequestId]: 58BE97934F29D06C384A5A46
+[HostId]: warncap.oss-cn-beijing.aliyuncs.com
+[ResponseError]:
+<?xml version="1.0" encoding="UTF-8"?>
+<Error>
+  <Code>InvalidAccessKeyId</Code>
+  <Message>The OSS Access Key Id you provided does not exist in our records.</Message>
+  <RequestId>58BE97934F29D06C384A5A46</RequestId>
+  <HostId>warncap.oss-cn-beijing.aliyuncs.com</HostId>
+  <OSSAccessKeyId>DEBUG</OSSAccessKeyId>
+</Error>
+
+	at com.aliyun.oss.common.utils.ExceptionFactory.createOSSException(ExceptionFactory.java:99)
+	at com.aliyun.oss.internal.OSSErrorResponseHandler.handle(OSSErrorResponseHandler.java:69)
+	at com.aliyun.oss.common.comm.ServiceClient.handleResponse(ServiceClient.java:248)
+	at com.aliyun.oss.common.comm.ServiceClient.sendRequestImpl(ServiceClient.java:130)
+	at com.aliyun.oss.common.comm.ServiceClient.sendRequest(ServiceClient.java:68)
+	at com.aliyun.oss.internal.OSSOperation.send(OSSOperation.java:94)
+	at com.aliyun.oss.internal.OSSOperation.doOperation(OSSOperation.java:149)
+	at com.aliyun.oss.internal.OSSOperation.doOperation(OSSOperation.java:113)
+	at com.aliyun.oss.internal.OSSOperation.doOperation(OSSOperation.java:108)
+	at com.aliyun.oss.internal.OSSBucketOperation.createBucket(OSSBucketOperation.java:165)
+	at com.aliyun.oss.OSSClient.createBucket(OSSClient.java:400)
+	at com.aliyun.oss.OSSClient.createBucket(OSSClient.java:394)
+	at aliyun.oss.TestOSS.ensureBucket(TestOSS.java:214)
+	at aliyun.oss.TestOSS.upload(TestOSS.java:172)
+	at aliyun.oss.PutFiles.main(PutFiles.java:79)
+20170307192113--INFO--main(String[]) - file sum=0

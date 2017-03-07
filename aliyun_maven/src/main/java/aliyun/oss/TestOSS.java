@@ -44,6 +44,21 @@ import com.aliyun.oss.model.ObjectMetadata;
  * @author PineTree
  * @date 2014年12月1日 下午3:23:32
  * @version
+ * 
+ * http://help.aliyun.com/view/11108271_13438690.html?spm=5176.7114037.1996646101.10.c7Lr2Q&pos=5 
+https://help.aliyun.com/document_detail/31837.html?spm=5176.7739584.2.1.Z6lq3V
+青岛节点外网地址： oss-cn-qingdao.aliyuncs.com
+青岛节点内网地址： oss-cn-qingdao-internal.aliyuncs.com
+北京节点外网地址：oss-cn-beijing.aliyuncs.com
+北京节点内网地址：oss-cn-beijing-internal.aliyuncs.com
+杭州节点外网地址： oss-cn-hangzhou.aliyuncs.com
+杭州节点内网地址： oss-cn-hangzhou-internal.aliyuncs.com
+香港节点外网地址： oss-cn-hongkong.aliyuncs.com
+香港节点内网地址： oss-cn-hongkong-internal.aliyuncs.com
+深圳节点外网地址： oss-cn-shenzhen.aliyuncs.com
+深圳节点内网地址： oss-cn-shenzhen-internal.aliyuncs.com
+原地址oss.aliyuncs.com 默认指向杭州节点外网地址
+原内网地址oss-internal.aliyuncs.com 默认指向杭州节点内网地址
  */
 public class TestOSS {
 	/**
@@ -52,11 +67,11 @@ public class TestOSS {
 	private static final Logger logger = Logger.getLogger(TestOSS.class);
 
 	/**
-	 * 阿里云ACCESS_ID
+	 * 阿里云ACCESS_ID,accessKey请登录https://ak-console.aliyun.com/#/查看
 	 */
 	private static String ACCESS_ID = "你的ACCESS_ID";
 	/**
-	 * 阿里云ACCESS_KEY
+	 * 阿里云ACCESS_KEY,accessKey请登录https://ak-console.aliyun.com/#/查看
 	 */
 	private static String ACCESS_KEY = "你的ACCESS_KEY";
 	/**
@@ -150,7 +165,7 @@ public class TestOSS {
 	 * @param Map<String, String> filelist
 	 * @param Map<Local file, Remote file> filelist
 	 */
-	public static void upload(Map<String, String> filelist) {
+	public static int upload(Map<String, String> filelist) {
 		// String bucketName = "demo10";
 //		String Objectkey = "photo1.jpg";
 //
@@ -166,7 +181,8 @@ public class TestOSS {
 		// ClientConfiguration conf = new ClientConfiguration();
 		// OSSClient client = new OSSClient(OSS_ENDPOINT, ACCESS_ID, ACCESS_KEY,
 		// conf);
-
+		int count = 0;
+		
 		try {
 			ensureBucket(client, BUCKET_NAME);
 			setBucketPublicReadable(client, BUCKET_NAME);
@@ -175,20 +191,27 @@ public class TestOSS {
 //			uploadFile(client, BUCKET_NAME, Objectkey, uploadFilePath);
 			
 			for(Map.Entry<String, String> a: filelist.entrySet()) {
-				if (logger.isInfoEnabled()) {
-					logger.info("正在上传... " + a.getKey() + " --> " + a.getValue()); //$NON-NLS-1$
+				try {
+					if (logger.isInfoEnabled()) {
+						logger.info("uploading... " + a.getKey() + " --> " + a.getValue()); //$NON-NLS-1$
+					}
+					uploadFile(client, BUCKET_NAME, a.getValue(), a.getKey());
+					count++;
+				} catch (Exception e) {
+					logger.error("upload(Map<String,String>) - e=" + e, e); //$NON-NLS-1$
 				}
-
-				uploadFile(client, BUCKET_NAME, a.getValue(), a.getKey());
 			}
 			
 //			System.out.println("正在下载...");
 //			downloadFile(client, BUCKET_NAME, Objectkey, downloadFilePath);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("upload(Map<String,String>) - e=" + e, e); //$NON-NLS-1$
+//			e.printStackTrace();
 		} finally {
 //			deleteBucket(client, BUCKET_NAME);
 		}
+		
+		return count;
 	}
 
 	/**
@@ -284,6 +307,10 @@ public class TestOSS {
 		InputStream input = new FileInputStream(file);
 		client.putObject(bucketName, Objectkey, input, objectMeta);
 		input.close();
+		
+		if (logger.isInfoEnabled()) {
+			logger.info("uploaded: " + filename + " , size : " + file.length()); //$NON-NLS-1$
+		}
 	}
 
 	/**

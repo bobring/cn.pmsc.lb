@@ -19,6 +19,27 @@ public class GetZIP {
 	 */
 	private static final Logger logger = Logger.getLogger(GetZIP.class);
 	
+	public static void DownloadCityWarnZIPs(String outdir) {
+		int file_count = 0;
+		
+		try {
+    		file_count = Client.wsdemo_getfirewarning_city(outdir);
+    		
+    		
+    		if(file_count == 0) {
+				if (logger.isInfoEnabled()) {
+					logger.info("DownloadCityWarnZIPs(String) - No files downloaded."); //$NON-NLS-1$
+				}
+    		} else {
+				if (logger.isInfoEnabled()) {
+					logger.info("DownloadCityWarnZIPs(String) - file_count=" + file_count); //$NON-NLS-1$
+				}
+    		}
+    	} catch (Exception e) {
+			logger.error("DownloadCityWarnZIPs(String) - e=" + e, e); //$NON-NLS-1$
+    	}
+	}
+	
 	public static void DownloadZIPs(String outdir) {
 		int file_count = 0;
 //    	Client.wsdemo_downloadzipfiles("/tmp", new URL("http://10.0.65.169:8080/WarningFileShare/WarnFileService?wsdl"));
@@ -86,25 +107,30 @@ public class GetZIP {
 //    	Client.wsdemo_downloadzipfiles("F:\\temp\\data", new URL("http://10.0.65.169:8080/WarningFileShare/WarnFileService?wsdl"));
     	
     	if (args.length == 2 && "-getzips".equalsIgnoreCase(args[0])) {
-    		try {
-    			MyProperties program_config = new MyProperties(args[1]);
-    	    	String outdir = program_config.getMyProperties("outdir");
-    	    	DownloadZIPs(outdir);
-    	    } catch(Exception e) {
-				logger.error("main(String[]) - ", e); //$NON-NLS-1$
-
-    	    	System.out.println("error happened while reading program cfgfile: " + args[1]);
-    	    	
-    	    	throw new RuntimeException(e); 
-    	    }
+//    		try {
+//    			MyProperties program_config = new MyProperties(args[1]);
+//    	    	String outdir = program_config.getMyProperties("outdir");
+//    	    	DownloadZIPs(outdir);
+//    	    } catch(Exception e) {
+//				logger.error("main(String[]) - ", e); //$NON-NLS-1$
+//
+//    	    	System.out.println("error happened while reading program cfgfile: " + args[1]);
+//    	    	
+//    	    	throw new RuntimeException(e); 
+//    	    }
+    		DownloadZIPs(args[1]);
 		} else if(args.length >= 3 && "-xmlToDB".equalsIgnoreCase(args[0])) {
 			XMLToDB(args);
+		} else if(args.length == 2 && "-getCityWarnFiles".equalsIgnoreCase(args[0])){
+			DownloadCityWarnZIPs(args[1]);
 		} else {
 			logger.error("main(String[]) - program paras formats error:" + args.toString());
 			throw new NullPointerException(
 					"program paras formats like:" + System.lineSeparator()
-					+ "1: -getzips configfile" + System.lineSeparator()
-					+ "2: -xmlToDB Dest_URL Filenames" + System.lineSeparator());
+					+ "1: -getzips filepath" + System.lineSeparator()
+//					+ "1: -getzips configfile" + System.lineSeparator()
+					+ "2: -xmlToDB Dest_URL Filenames" + System.lineSeparator()
+					+ "3: -getCityWarnFiles filepath" + System.lineSeparator());
 		}
     	
 		if (logger.isDebugEnabled()) {

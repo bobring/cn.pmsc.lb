@@ -24,7 +24,6 @@ import com.pmsc.warning.XmlBean.Method;
 import com.pmsc.warning.XmlBean.WarnXML;
 import com.pmsc.warning.WarnCap;
 
-import cn.pmsc.lb.MyLog;
 import cn.pmsc.lb.MySimpleJson;
 import cn.pmsc.lb.MyTime;
 import net.sf.json.JSONArray;
@@ -234,6 +233,90 @@ public class Client {
 	}
 	
 	
+	/**
+	 * 调取市县级森林火险数据文件
+	 * @param Dir
+	 * @return
+	 * @throws Exception
+	 */
+	public static int wsdemo_getfirewarning_city(String Dir) throws Exception {
+		FileShare fsp = null;
+		
+		int num = 0; //zip文件个数
+		int count = 0; //实际下载文件总数
+		
+		try {
+			//获得当前服务提供的类型
+			fsp = (FileShare)context.getBean("client");
+			//通过服务的协议调用提供的方法
+			//全部站点(最近24小时之内的)
+			List<String> files = fsp.listFilesByElement("A", "Red,Orange,Yellow,Blue,Unknown", "11B25", 1440);
+			
+			//调取国家级和省级站点(最近1600分钟之内的)
+			List<String> state_files = fsp.listFilesByElement("G", "Red,Orange,Yellow,Blue,Unknown", "11B25", 1600);
+			List<String> province_files = fsp.listFilesByElement("S", "Red,Orange,Yellow,Blue,Unknown", "11B25", 1600);
+			
+			//从全部站点中剔除国家级和省级信息
+			if (!files.isEmpty()) {
+				files.removeAll(state_files);
+				files.removeAll(province_files);
+			}
+			
+			
+			num = files.size();
+			if(num != 0) {
+				DataHandler returnhandler = null;
+				FileOutputStream fileOutPutStream = null;
+				String filepath = null;
+				
+				for(String fileName:files) {
+					filepath = Dir + File.separator + fileName;
+					
+					File file = new File(filepath);
+					if(file.isFile() && file.length() > 0) {
+						if (logger.isInfoEnabled()) {
+							logger.info("file already exists: " + fileName); //$NON-NLS-1$
+						}
+
+//						System.out.println("file already exists: " + fileName);
+					} else {
+						fileOutPutStream = new FileOutputStream(filepath);
+						returnhandler = fsp.download(fileName);
+						returnhandler.writeTo(fileOutPutStream);
+						
+						fileOutPutStream.flush();
+						fileOutPutStream.close();
+						
+						if (logger.isInfoEnabled()) {
+							logger.info("downloading file: " + fileName); //$NON-NLS-1$
+						}
+						count++;
+//						System.out.println("downloading file: " + fileName);
+					}
+				}
+			} else {
+				if (logger.isInfoEnabled()) {
+					logger.info("no zip files founded."); //$NON-NLS-1$
+				}
+//				System.out.println("no zip files founded.");
+			}
+			
+			return count;
+			
+		} catch (Exception e) {
+			throw e;
+//			e.printStackTrace();
+		}
+	}
+	
+	
+	
+	/**
+	 * 下载最新的100个预警ZIP文件
+	 * @param Dir, 下载路径
+	 * @return
+	 * @throws Exception
+	 */
 	public static int wsdemo_downloadzipfiles(String Dir) throws Exception {
 //		FileShareService fss = null;
 		FileShare fsp = null;
