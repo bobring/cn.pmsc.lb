@@ -7,6 +7,8 @@ import java.io.FileInputStream;
 //import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -269,7 +271,7 @@ public class TestOSS {
 	private static void setBucketPublicReadable(OSSClient client, String bucketName)
 			throws OSSException, ClientException {
 		// 创建bucket
-		client.createBucket(bucketName);
+//		client.createBucket(bucketName);
 
 		// 设置bucket的访问权限， public-read-write权限
 		client.setBucketAcl(bucketName, CannedAccessControlList.PublicRead);
@@ -330,5 +332,23 @@ public class TestOSS {
 	private static void downloadFile(OSSClient client, String bucketName, String Objectkey, String filename)
 			throws OSSException, ClientException {
 		client.getObject(new GetObjectRequest(bucketName, Objectkey), new File(filename));
+	}
+	
+	
+	/**
+	 * 获得url链接
+	 *
+	 * @param key
+	 * @return
+	 */
+	public String getUrl(OSSClient client, String bucketName, String key) {
+		// 设置URL过期时间为10年 3600l* 1000*24*365*10
+		Date expiration = new Date(new Date().getTime() + 3600l * 1000 * 24 * 365 * 10);
+		// 生成URL
+		URL url = client.generatePresignedUrl(bucketName, key, expiration);
+		if (url != null) {
+			return url.toString();
+		}
+		return null;
 	}
 }

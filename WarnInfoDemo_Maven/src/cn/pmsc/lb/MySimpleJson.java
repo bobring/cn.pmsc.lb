@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.sf.json.JSONObject;
-import net.sf.json.util.JSONTokener;
+//import net.sf.json.util.JSONTokener;
 import net.sf.json.JSONArray;
 
 
@@ -78,7 +78,7 @@ public class MySimpleJson {
 		arr.clear();
 	}
 	
-	public static String PostJSON(URL url, Object post_obj) throws Exception {
+	public static void PostJSON(URL url, Object post_obj) throws Exception {
 		HttpURLConnection connection = null;
 		
 		try {
@@ -115,10 +115,13 @@ public class MySimpleJson {
             //打印响应头信息
 	        Map<String, List<String>> map = connection.getHeaderFields();
 	        
-	        System.out.println("显示响应Header信息...\n");
+			if (logger.isInfoEnabled()) {
+				logger.info("PostJSON(URL, Object) - 显示响应Header信息..."); //$NON-NLS-1$
+			}
             for (Map.Entry<String, List<String>> entry : map.entrySet()) {
-                    System.out.println("Key : " + entry.getKey() + 
-                                       " ,Value : " + entry.getValue());
+				if (logger.isInfoEnabled()) {
+					logger.info("PostJSON(URL, Object) - Key : " + entry.getKey() + " ,Value : " + entry.getValue()); //$NON-NLS-1$ //$NON-NLS-2$
+				}
             }
 
             //读取响应
@@ -130,15 +133,17 @@ public class MySimpleJson {
                 lines = new String(lines.getBytes(), "utf-8");
                 sb.append(lines);
             }
-            System.out.println(sb);
+			if (logger.isInfoEnabled()) {
+				logger.info("PostJSON(URL, Object) - " + sb); //$NON-NLS-1$
+			}
             reader.close();
             // 断开连接
             connection.disconnect();
             
             //释放内存，清除已发送的JSON数据
-            clear();
+//            clear();
             
-            return sb.toString();
+//            return sb.toString();
 		} catch (MalformedURLException e) {
             // TODO Auto-generated catch block
 //            e.printStackTrace();

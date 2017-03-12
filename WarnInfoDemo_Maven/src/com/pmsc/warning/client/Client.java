@@ -11,8 +11,9 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
-import javax.activation.DataHandler;  
+import javax.activation.DataHandler;
 
+import org.springframework.beans.BeansException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;  
   
 
@@ -47,7 +48,7 @@ public class Client {
 	static {
 		try {
 			context=new ClassPathXmlApplicationContext("applicationContext.xml");
-		} catch (Exception e) {
+		} catch (BeansException e) {
 			e.printStackTrace();
 			throw new RuntimeException("XML config file Read error!");
 		}
@@ -273,12 +274,11 @@ public class Client {
 					filepath = Dir + File.separator + fileName;
 					
 					File file = new File(filepath);
+					
 					if(file.isFile() && file.length() > 0) {
 						if (logger.isInfoEnabled()) {
-							logger.info("file already exists: " + fileName); //$NON-NLS-1$
+							logger.info("file already exists: " + filepath); //$NON-NLS-1$
 						}
-
-//						System.out.println("file already exists: " + fileName);
 					} else {
 						fileOutPutStream = new FileOutputStream(filepath);
 						returnhandler = fsp.download(fileName);
@@ -291,7 +291,88 @@ public class Client {
 							logger.info("downloading file: " + fileName); //$NON-NLS-1$
 						}
 						count++;
-//						System.out.println("downloading file: " + fileName);
+					}
+				}
+			} else {
+				if (logger.isInfoEnabled()) {
+					logger.info("no zip files founded."); //$NON-NLS-1$
+				}
+//				System.out.println("no zip files founded.");
+			}
+			
+			return count;
+			
+		} catch (Exception e) {
+			throw e;
+//			e.printStackTrace();
+		}
+	}
+	
+	
+	/**
+	 * 调取市县级森林火险数据文件
+	 * @param Dir
+	 * @return
+	 * @throws Exception
+	 */
+	public static int wsdemo_getfirewarning_yunwei(String Dir, String BakDir) throws Exception {
+		FileShare fsp = null;
+		
+		int num = 0; //zip文件个数
+		int count = 0; //实际下载文件总数
+		
+		try {
+			//获得当前服务提供的类型
+			fsp = (FileShare)context.getBean("client");
+			//通过服务的协议调用提供的方法
+			//全部站点(最近24小时之内的)
+			List<String> files = fsp.listFilesByElement("A", "Red,Orange,Yellow,Blue,Unknown", "11B25", 1440);
+			
+			//调取国家级和省级站点(最近1600分钟之内的)
+			List<String> state_files = fsp.listFilesByElement("G", "Red,Orange,Yellow,Blue,Unknown", "11B25", 1600);
+			List<String> province_files = fsp.listFilesByElement("S", "Red,Orange,Yellow,Blue,Unknown", "11B25", 1600);
+			
+			//从全部站点中剔除国家级和省级信息
+			if (!files.isEmpty()) {
+				files.removeAll(state_files);
+				files.removeAll(province_files);
+			}
+			
+			
+			num = files.size();
+			if(num != 0) {
+				DataHandler returnhandler = null;
+				FileOutputStream fileOutPutStream = null;
+				String filepath = null;
+				String bakfilepath = null;
+				
+				for(String fileName:files) {
+					filepath = Dir + File.separator + fileName;
+					bakfilepath = BakDir + File.separator + fileName;
+					
+					File file = new File(filepath);
+					File bakfile = new File(bakfilepath);
+					
+					if(file.isFile() && file.length() > 0) {
+						if (logger.isInfoEnabled()) {
+							logger.info("file already exists: " + filepath); //$NON-NLS-1$
+						}
+					} else if(bakfile.isFile() && bakfile.length() > 0) {
+						if (logger.isInfoEnabled()) {
+							logger.info("file already exists: " + bakfilepath); //$NON-NLS-1$
+						}
+					} else {
+						fileOutPutStream = new FileOutputStream(filepath);
+						returnhandler = fsp.download(fileName);
+						returnhandler.writeTo(fileOutPutStream);
+						
+						fileOutPutStream.flush();
+						fileOutPutStream.close();
+						
+						if (logger.isInfoEnabled()) {
+							logger.info("downloading file: " + fileName); //$NON-NLS-1$
+						}
+						count++;
 					}
 				}
 			} else {
@@ -358,6 +439,95 @@ public class Client {
 						}
 
 //						System.out.println("file already exists: " + fileName);
+					} else {
+						fileOutPutStream = new FileOutputStream(filepath);
+						returnhandler = fsp.download(fileName);
+						returnhandler.writeTo(fileOutPutStream);
+						
+						fileOutPutStream.flush();
+						fileOutPutStream.close();
+						
+						if (logger.isInfoEnabled()) {
+							logger.info("downloading file: " + fileName); //$NON-NLS-1$
+						}
+//						MyLog.info("downloading file: " + fileName);
+						count++;
+//						System.out.println("downloading file: " + fileName);
+					}
+				}
+			} else {
+				if (logger.isInfoEnabled()) {
+					logger.info("no zip files founded."); //$NON-NLS-1$
+				}
+//				MyLog.info("no zip files founded.");
+//				System.out.println("no zip files founded.");
+			}
+			
+			return count;
+			
+		} catch (Exception e) {
+			throw e;
+//			e.printStackTrace();
+		}
+	}
+	
+	
+	
+	
+	/**
+	 * 用于配合运行监控科的后续分发环节,同时监控下载路径Dir和备份路径BakDir
+	 * 只要两个路径中下有一个文件已存在,即不再重复下载
+	 * 下载最新的100个预警ZIP文件
+	 * @param Dir, 下载路径
+	 * @param BakDir, 备份路径
+	 * @return
+	 * @throws Exception
+	 */
+	public static int wsdemo_yunwei_zipfiles(String Dir, String BakDir) throws Exception {
+//		FileShareService fss = null;
+		FileShare fsp = null;
+		
+		int num = 0; //zip文件个数
+		int count = 0; //实际下载文件总数
+		
+		try {
+			//从wsdl文件中获得服务名
+//			fss = new FileShareService(url);
+			//获得当前服务提供的类型
+			fsp = (FileShare)context.getBean("client");
+			//通过服务的协议调用提供的方法
+			List<String> files = fsp.listFilesByTop(100);
+			
+			List<String> maxfiles = fsp.listFilesByWarnId(fsp.getMaxWarnId());
+			
+			for(String a:maxfiles) {
+				String fileName = a.substring(0, a.lastIndexOf("_"));
+				files.add(fileName);
+				System.out.println("maxfiles: " + fileName);
+			}
+			
+			num = files.size();
+			if(num != 0) {
+				DataHandler returnhandler = null;
+				FileOutputStream fileOutPutStream = null;
+				String filepath = null;
+				String bakfilepath = null;
+				
+				for(String fileName:files) {
+					filepath = Dir + File.separator + fileName;
+					bakfilepath = BakDir + File.separator + fileName;
+					
+					File file = new File(filepath);
+					File bakfile = new File(bakfilepath);
+					
+					if(file.isFile() && file.length() > 0) {
+						if (logger.isInfoEnabled()) {
+							logger.info("file already exists: " + filepath); //$NON-NLS-1$
+						}
+					} else if (bakfile.isFile() && bakfile.length() > 0) {
+						if (logger.isInfoEnabled()) {
+							logger.info("file already exists: " + bakfilepath); //$NON-NLS-1$
+						}
 					} else {
 						fileOutPutStream = new FileOutputStream(filepath);
 						returnhandler = fsp.download(fileName);
