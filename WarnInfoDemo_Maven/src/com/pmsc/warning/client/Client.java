@@ -595,6 +595,33 @@ public class Client {
 	}
 	
 	
+	
+	
+	/**
+	 * 读取预警服务接口
+	 * 返回所有预警站点信息
+	 * @return List<String>
+	 */
+	public static List<String> wsdemo_getstalist() {
+		
+		FileShare fsp = null;
+		
+		try {
+			//从wsdl文件中获得服务名
+//			fss = new FileShareService(url);
+			//获得当前服务提供的类型
+			fsp = (FileShare)context.getBean("client");
+			//通过服务的协议调用提供的方法
+			return fsp.listWarnRegionInfo();
+		} catch (Exception e) {
+//			throw e;
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
+	
 	public static WarnCap search_WarnID(String WarnID, List<WarnCap> WList) {
 		for(WarnCap a:WList) {
 			if(WarnID.equals(a.getIdentifier())) {

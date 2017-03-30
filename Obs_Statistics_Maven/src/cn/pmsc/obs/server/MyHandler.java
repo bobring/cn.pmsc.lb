@@ -188,15 +188,15 @@ public class MyHandler implements HttpHandler {
 		
 		Headers requestHeaders = exchange.getRequestHeaders();
 		Set<String> keySet = requestHeaders.keySet();
-			Iterator<String> iter = keySet.iterator();
-			while (iter.hasNext()) {
-				String key = iter.next();
-				List<String> values = requestHeaders.get(key);
-				String s = key + " = " + values.toString();
-				System.out.println(s);
-				logbuf.append(s + System.lineSeparator());
-			}
-			logbuf.append("jdk自带轻量级http server例子" + System.lineSeparator());
+		Iterator<String> iter = keySet.iterator();
+		while (iter.hasNext()) {
+			String key = iter.next();
+			List<String> values = requestHeaders.get(key);
+			String s = key + " = " + values.toString();
+			System.out.println(s);
+			logbuf.append(s + System.lineSeparator());
+		}
+		logbuf.append("jdk自带轻量级http server例子" + System.lineSeparator());
 			
 		if (requestMethod.equalsIgnoreCase("POST")) {
 			InputStreamReader in = new InputStreamReader(exchange.getRequestBody());
@@ -222,8 +222,8 @@ public class MyHandler implements HttpHandler {
 			responseBody.write(logbuf.toString().getBytes());
 			
 		} else if(requestMethod.equalsIgnoreCase("GET")) {
-//			responseBody.append("jdk自带轻量级http server例子");
-
+			
+			
 		} else {
 			str = "Invalid http request method: " + requestMethod;
 			logger.error(str, null); //$NON-NLS-1$

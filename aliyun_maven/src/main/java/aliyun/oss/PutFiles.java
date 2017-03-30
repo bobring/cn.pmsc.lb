@@ -28,6 +28,10 @@ public class PutFiles {
 			file = new File(args[i]);
 			if(file.isFile()) {
 				filemap.put(args[i], file.getName());
+			} else {
+				if (logger.isInfoEnabled()) {
+					logger.info("make_list(String[]) - not a regular file: " + args[i]); //$NON-NLS-1$
+				}
 			}
 		}
 		return filemap;
