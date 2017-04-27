@@ -24,13 +24,15 @@ public class PutFiles {
 		Map<String, String> filemap = new HashMap<String, String>();
 		
 		File file = null;
-		for(int i = 1; i < args.length; i++) {
-			file = new File(args[i]);
+		
+		String[] files = args[1].split("\\s+");
+		for(int i = 0; i < files.length; i++) {
+			file = new File(files[i]);
 			if(file.isFile()) {
-				filemap.put(args[i], file.getName());
+				filemap.put(files[i], file.getName());
 			} else {
 				if (logger.isInfoEnabled()) {
-					logger.info("make_list(String[]) - not a regular file: " + args[i]); //$NON-NLS-1$
+					logger.info("make_list(String[]) - not a regular file: " + files[i]); //$NON-NLS-1$
 				}
 			}
 		}

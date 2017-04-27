@@ -234,6 +234,10 @@ public class Client {
 	}
 	
 	
+	
+	
+	
+	
 	/**
 	 * 调取市县级森林火险数据文件
 	 * @param Dir
@@ -405,6 +409,8 @@ public class Client {
 		int num = 0; //zip文件个数
 		int count = 0; //实际下载文件总数
 		
+		String area_code = null; //行政区域级别
+		
 		try {
 			//从wsdl文件中获得服务名
 //			fss = new FileShareService(url);
@@ -412,6 +418,14 @@ public class Client {
 			fsp = (FileShare)context.getBean("client");
 			//通过服务的协议调用提供的方法
 			List<String> files = fsp.listFilesByTop(100);
+			
+			//全部站点(最近24小时之内的)
+			List<String> allfiles = fsp.listFilesByElement("A", "Red,Orange,Yellow,Blue,Unknown", "A", 1440);
+			
+			//调取国家级和省级站点(最近1600分钟之内的)
+			List<String> state_files = fsp.listFilesByElement("G", "Red,Orange,Yellow,Blue,Unknown", "A", 1600);
+			List<String> province_files = fsp.listFilesByElement("S", "Red,Orange,Yellow,Blue,Unknown", "A", 1600);
+			
 			
 			List<String> maxfiles = fsp.listFilesByWarnId(fsp.getMaxWarnId());
 			
@@ -447,8 +461,19 @@ public class Client {
 						fileOutPutStream.flush();
 						fileOutPutStream.close();
 						
+						if (state_files.contains(fileName)) {
+							area_code = "State";
+						} else if (province_files.contains(fileName)) {
+							area_code = "Province";
+						} else if (allfiles.contains(fileName)) {
+							area_code = "City";
+						} else {
+							area_code = "";
+						}
+						
 						if (logger.isInfoEnabled()) {
-							logger.info("downloading file: " + fileName); //$NON-NLS-1$
+							logger.info("downloading file: " + fileName + System.lineSeparator()
+									+ "areacode: " + fileName + " " + area_code); //$NON-NLS-1$
 						}
 //						MyLog.info("downloading file: " + fileName);
 						count++;

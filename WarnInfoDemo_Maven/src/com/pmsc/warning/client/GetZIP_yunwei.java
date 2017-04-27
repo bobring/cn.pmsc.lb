@@ -5,6 +5,7 @@ import org.apache.log4j.Logger;
 import com.pmsc.warning.XmlBean.WarnXML;
 import com.pmsc.warning.XmlBean.XMLUtil;
 
+import java.io.FileReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -111,7 +112,7 @@ public class GetZIP_yunwei {
 		
     	if (args.length == 2 && "-getzips".equalsIgnoreCase(args[0])) {
     		try {
-    			program_config = new MyProperties(args[1]);
+    			program_config = new MyProperties(new FileReader(args[1]));
     	    	outdir = program_config.getMyProperties("outdir");
     	    	bakdir = program_config.getMyProperties("bakdir");
     	    	DownloadZIPs(outdir, bakdir);
@@ -127,7 +128,7 @@ public class GetZIP_yunwei {
 			XMLToDB(args);
 		} else if(args.length == 2 && "-getCityFireWarns".equalsIgnoreCase(args[0])){
 			try {
-    			program_config = new MyProperties(args[1]);
+    			program_config = new MyProperties(new FileReader(args[1]));
     	    	outdir = program_config.getMyProperties("outdir");
     	    	bakdir = program_config.getMyProperties("bakdir");
     	    	DownloadCityWarnZIPs(outdir, bakdir);

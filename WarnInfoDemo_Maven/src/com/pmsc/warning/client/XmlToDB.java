@@ -10,19 +10,19 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 public class XmlToDB {
-
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		if (args.length < 2) {
 			throw new NullPointerException(
-					"enter the Dest URL and the XML files");
+					"enter the Dest URL and the XML list");
 		}
 		
 		WarnXML wx = null;
 		JSONArray arr = new JSONArray();
 		
-		for(int i = 1; i < args.length; i++) {
-			wx = (WarnXML) XMLUtil.XmlFileToObject(WarnXML.class, args[i]);
+		String[] files = args[1].split("\\s+");
+		for (int i = 0; i < files.length; i++) {
+			wx = (WarnXML) XMLUtil.XmlFileToObject(WarnXML.class, files[i]);
 			arr.add((JSONObject) Client.warnxmltoJSON(wx));
 		}
 		

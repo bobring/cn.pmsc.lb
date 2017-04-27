@@ -24,6 +24,7 @@ import com.aliyun.oss.model.GetObjectRequest;
 import com.aliyun.oss.model.OSSObjectSummary;
 import com.aliyun.oss.model.ObjectListing;
 import com.aliyun.oss.model.ObjectMetadata;
+import com.aliyun.oss.model.PutObjectResult;
 
 /**
  *
@@ -292,9 +293,10 @@ public class TestOSS {
 	 * @throws ClientException
 	 * @throws IOException 
 	 */
-	private static void uploadFile(OSSClient client, String bucketName, String Objectkey, String filename)
+	private static void uploadFile(OSSClient client, String bucketName, String Objectkey, String filepath)
 			throws OSSException, ClientException, IOException {
-		File file = new File(filename);
+		File file = new File(filepath);
+		String filename = file.getName();
 		ObjectMetadata objectMeta = new ObjectMetadata();
 		objectMeta.setContentLength(file.length());
 		// 判断上传类型，多的可根据自己需求来判定
@@ -310,8 +312,11 @@ public class TestOSS {
 		client.putObject(bucketName, Objectkey, input, objectMeta);
 		input.close();
 		
+		String url_str = getUrl(client, bucketName, Objectkey);
+		
 		if (logger.isInfoEnabled()) {
-			logger.info("uploaded: " + filename + " , size : " + file.length()); //$NON-NLS-1$
+			logger.info("uploaded: " + filepath + " , size : " + file.length() + 
+					System.lineSeparator() + "URL_addr: " + filename + " " + url_str); //$NON-NLS-1$
 		}
 	}
 
@@ -341,7 +346,7 @@ public class TestOSS {
 	 * @param key
 	 * @return
 	 */
-	public String getUrl(OSSClient client, String bucketName, String key) {
+	public static String getUrl(OSSClient client, String bucketName, String key) {
 		// 设置URL过期时间为10年 3600l* 1000*24*365*10
 		Date expiration = new Date(new Date().getTime() + 3600l * 1000 * 24 * 365 * 10);
 		// 生成URL
