@@ -73,13 +73,14 @@ public class GetZIP {
 		WarnXML wx = null;
 		JSONArray arr = new JSONArray();
 		
+		String[] files = args[2].split("\\s+");
 		try {
-			for(int i = 2; i < args.length; i++) {
-				wx = (WarnXML) XMLUtil.XmlFileToObject(WarnXML.class, args[i]);
+			for(int i = 0; i < files.length; i++) {
+				wx = (WarnXML) XMLUtil.XmlFileToObject(WarnXML.class, files[i]);
 				if(wx != null) {
 					arr.add((JSONObject) Client.warnxmltoJSON(wx));
 				} else {
-					logger.error("XMLToDB(String[]) - XML file format error: " + args[i]); //$NON-NLS-1$
+					logger.error("XMLToDB(String[]) - XML file format error: " + files[i]); //$NON-NLS-1$
 				}
 			}
 			MySimpleJson.PostJSON(new URL(args[1]), arr);
@@ -107,17 +108,6 @@ public class GetZIP {
 //    	Client.wsdemo_downloadzipfiles("F:\\temp\\data", new URL("http://10.0.65.169:8080/WarningFileShare/WarnFileService?wsdl"));
     	
     	if (args.length == 2 && "-getzips".equalsIgnoreCase(args[0])) {
-//    		try {
-//    			MyProperties program_config = new MyProperties(args[1]);
-//    	    	String outdir = program_config.getMyProperties("outdir");
-//    	    	DownloadZIPs(outdir);
-//    	    } catch(Exception e) {
-//				logger.error("main(String[]) - ", e); //$NON-NLS-1$
-//
-//    	    	System.out.println("error happened while reading program cfgfile: " + args[1]);
-//    	    	
-//    	    	throw new RuntimeException(e); 
-//    	    }
     		DownloadZIPs(args[1]);
 		} else if(args.length >= 3 && "-xmlToDB".equalsIgnoreCase(args[0])) {
 			XMLToDB(args);

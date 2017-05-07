@@ -18,7 +18,8 @@ import org.apache.commons.net.ftp.parser.FTPTimestampParserImpl;
 public class FTPTimestampParserImplExZH extends FTPTimestampParserImpl {
 
 	private SimpleDateFormat defaultDateFormat = new SimpleDateFormat("mm d hh:mm");
-	private SimpleDateFormat recentDateFormat = new SimpleDateFormat("yyyy mm d");
+//	private SimpleDateFormat recentDateFormat = new SimpleDateFormat("yyyy mm d");
+	private SimpleDateFormat recentDateFormat = new SimpleDateFormat("mm d yyyy");
 
 	/**
 	 * @author hzwei206 将中文环境的时间格式进行转换

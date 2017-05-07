@@ -2,6 +2,7 @@ package ftpClient;
 
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPClientConfig;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPFileFilters;
 import org.apache.commons.net.ftp.FTPReply;
@@ -110,6 +111,8 @@ public class FTPUtils {
 		} else {
 			ftp.enterLocalActiveMode();
 		}
+		
+//		ftp.configure(new FTPClientConfig("ftpClient.UnixFTPEntryParser"));
     }
 
     /**
@@ -380,7 +383,9 @@ public class FTPUtils {
         for (int i = 0; i < size; i++) {
         	dirList.add(ftpDirs[i]);
         }
-
+        
+        System.out.println(dirList.size() + " dirs founded in " + filePath);
+        
         return dirList;
     }
 
@@ -399,14 +404,17 @@ public class FTPUtils {
         // Use passive mode to pass firewalls.
 //        ftp.enterLocalPassiveMode();
         FTPFile[] ftpFiles = ftp.listFiles(filePath, FTPFileFilters.NON_NULL);
+//        FTPFile[] ftpFiles = ftp.listFiles(filePath);
         int size = (ftpFiles == null) ? 0 : ftpFiles.length;
         for (int i = 0; i < size; i++) {
             fileList.add(ftpFiles[i]);
         }
-        
+        //删除列表中的文件夹
         List<FTPFile> dirList = listDirs(filePath);
-        
         fileList.removeAll(dirList);
+        
+        System.out.println(fileList.size() + " files founded in " + filePath);
+        
         return fileList;
     }
     

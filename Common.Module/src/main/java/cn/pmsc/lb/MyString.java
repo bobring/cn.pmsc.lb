@@ -5,11 +5,11 @@ import java.io.File;
 public class MyString {
 	
 	public static String filepath(String path, String filename) {
-		if(path.lastIndexOf(File.pathSeparator) == path.length() - 1
+		if(path.lastIndexOf(File.separator) == path.length() - 1
 				&& !path.isEmpty()) {
 			return path + filename;
 		} else if(!path.isEmpty()) {
-			return path + File.pathSeparator + filename;
+			return path + File.separator + filename;
 		} else {
 			return filename;
 		}
