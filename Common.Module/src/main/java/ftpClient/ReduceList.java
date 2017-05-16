@@ -91,20 +91,47 @@ public class ReduceList {
 	
 	
 	/**
+	 * 获取文件名，通配本地文件和FTP文件
+	 * 遇上未识别的对象时，为防止出现null值错误，设定为1970年1月1日零时
+	 * @param t
+	 * @return
+	 */
+	private static <T> String get_fileName(T t) {
+		if(t instanceof File) {
+			File f = (File)t;
+			return f.getName();
+		} else if(t instanceof FTPFile) {
+			FTPFile f = (FTPFile)t;
+			return f.getName();
+		} else {
+			if (logger.isDebugEnabled()) {
+				logger.debug("get_fileDate(T) - {}", "failed to get time info from file " + t.toString()); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+			return null;
+		}
+	}
+	
+	
+	/**
 	 * 获取文件的最后修改时间，通配本地文件和FTP文件
 	 * 遇上未识别的对象时，为防止出现null值错误，设定为1970年1月1日零时
 	 * @param t
 	 * @return
 	 */
-	public static <T> Date get_fileDate(T t) {
+	private static <T> Date get_fileDate(T t) {
 		if(t instanceof File) {
 			File f = (File)t;
 			return new Date(f.lastModified());
 		} else if(t instanceof FTPFile) {
 			FTPFile f = (FTPFile)t;
-			if (logger.isDebugEnabled()) {
-				logger.debug("get_fileDate(T) - {}", f.getName() + " " + f.getTimestamp().getTime().toString()); //$NON-NLS-1$ //$NON-NLS-2$
+//			if (logger.isDebugEnabled()) {
+//				logger.debug("get_fileDate(T) - {}", f.getName() + " " + f.getTimestamp().getTime().toString()); //$NON-NLS-1$ //$NON-NLS-2$
+//			}
+
+			if (logger.isTraceEnabled()) {
+				logger.trace("get_fileDate(T) - {}", f.getName() + " " + f.getTimestamp().getTime().toString()); //$NON-NLS-1$
 			}
+
 			return f.getTimestamp().getTime();
 		} else {
 			if (logger.isDebugEnabled()) {
@@ -143,9 +170,14 @@ public class ReduceList {
 		if (ftpfile.getSize() == localfile.length()
 				&& ftpfile.getTimestamp().getTime().getTime() == (localfile.lastModified())) {
 			return true;
+		} else {
+			if (logger.isTraceEnabled()) {
+				logger.trace("equals() - " + ftpfile.getName() + ":" + ftpfile.getTimestamp().getTime()
+						+ ":" + ftpfile.getSize() + " " + localfile.getName() + ":" 
+						+ localfile.lastModified() + ":" + localfile.length()); //$NON-NLS-1$
+			}
+			return false;
 		}
-
-		return false;
 	}
 
 	/**
@@ -183,6 +215,11 @@ public class ReduceList {
 	 * @return
 	 */
 	public static <T, E> void get_TransList(List<T> source, List<E> target, Map<String, String> fileMap) {
+		
+		if (logger.isDebugEnabled()) {
+			logger.debug("get_TransList() - before trans reduce, " + target.size() + " results left."); //$NON-NLS-1$
+		}
+		
 		for (Iterator<E> it = target.iterator(); it.hasNext() && !target.isEmpty();) {
 			E a = (E) it.next();
 			for (T b : source) {
@@ -230,13 +267,17 @@ public class ReduceList {
 							break;
 						}
 					}
-					
-					if (equals(ff, file)) {
-						it.remove();
-						break;
+				} else {
+					if (logger.isTraceEnabled()) {
+						logger.trace("get_TransList() - unknown type of "
+								+ target.toString() + " or " + source.toString()); //$NON-NLS-1$
 					}
 				}
 			}
+		}
+		
+		if (logger.isDebugEnabled()) {
+			logger.debug("get_TransList() - after trans reduce, " + target.size() + " results left."); //$NON-NLS-1$
 		}
 	}
 
@@ -260,5 +301,24 @@ public class ReduceList {
 		}
 
 		return namelist;
+	}
+	
+	
+	
+	/**
+	 * 从target集合中剔除与source重名的项目
+	 * @param source
+	 * @param target
+	 */
+	public static <T> void reduce_ListByName(List<T> source, List<T> target) {
+		List<String> dirnames = ReduceList.get_NameList(source);
+
+		for (Iterator<T> it = target.iterator(); it.hasNext() 
+				&& !target.isEmpty();) {
+			T t = (T) it.next();
+			if (dirnames.contains(get_fileName(t))) {
+				it.remove();
+			}
+		}
 	}
 }

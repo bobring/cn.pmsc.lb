@@ -17,15 +17,8 @@ public class FTPDownloadThread extends Thread {
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(FTPDownloadThread.class);
 
-	private String host;				//FTP站点名
-    private int port = 21;				//FTP端口号，默认21
-    private String user;				//FTP用户名
-    private String password;			//FTP密码
-    private boolean isTextMode;			//文件传输模式，true为文本模式，false为二进制模式
-    private boolean isPassiveMode;		//FTP连接模式，true为被动模式，false为主动模式
-    private String ftppath;				//FTP路径
+	private FtpInfo ftpinfo;	//FTP连接信息
     private List<FTPFile> filelist;		//待下载的FTP文件清单
-    private String localpath;			//下载的本地存储路径
     private Map<String,String> fileMap;	//文件重命名清单
     
     private int speed = 500*1000;		//预订平均传输速率，字节每秒
@@ -51,115 +44,105 @@ public class FTPDownloadThread extends Thread {
 		
 		return seconds;
 	}
-	/**
-	 * @param host
-	 * @param port
-	 * @param user
-	 * @param password
-	 * @param isTextMode
-	 * @param isPassiveMode
-	 * @param ftppath
-	 * @param localfilelist
-	 */
-	public FTPDownloadThread(String host, int port, String user, 
-			String password, boolean isTextMode, boolean isPassiveMode, 
-			String ftppath, List<FTPFile> filelist, String localpath) {
-		this.host = host;
-		this.port = port;
-		this.user = user;
-		this.password = password;
-		this.isTextMode = isTextMode;
-		this.isPassiveMode = isPassiveMode;
-		this.ftppath = ftppath;
+	
+	public FTPDownloadThread(FtpInfo ftpinfo, List<FTPFile> filelist) {
+		this.ftpinfo = ftpinfo;
+		
 		this.filelist = filelist;
-		this.localpath = localpath;
 		this.fileMap = null;
 		
 		this.trans_period = calculate();
-//		this.fileMap = new HashMap<String, String>();
-//		
-//		for (File file : localfilelist) {
-//			fileMap.put(file.getName(), file.getName());
-//		}
 	}
 	
 	
 	
-	/**
-	 * @param host
-	 * @param port
-	 * @param user
-	 * @param password
-	 * @param isTextMode
-	 * @param isPassiveMode
-	 * @param ftppath
-	 * @param filelist
-	 * @param fileMap
-	 */
-	public FTPDownloadThread(String host, int port, String user, 
-			String password, boolean isTextMode, boolean isPassiveMode, 
-			String ftppath, List<FTPFile> filelist, 
-			String localpath, Map<String,String> fileMap) {
-		this.host = host;
-		this.port = port;
-		this.user = user;
-		this.password = password;
-		this.isTextMode = isTextMode;
-		this.isPassiveMode = isPassiveMode;
-		this.ftppath = ftppath;
+	public FTPDownloadThread(FtpInfo ftpinfo, List<FTPFile> filelist, 
+			Map<String,String> fileMap) {
+		this.ftpinfo = ftpinfo;
+		
 		this.filelist = filelist;
-		this.localpath = localpath;
 		this.fileMap = fileMap;
 		
 		this.trans_period = calculate();
 	}
 	
+	
+	
+	
 	public void run() {
 		// TODO Auto-generated method stub
 //		Runtime runtime = Runtime.getRuntime();
 //		String cmd = "cd " + localpath;
+		FTPUtils ftpclient = new FTPUtils();
 		
 		try {
 			//连接FTP
-			FTPUtils.connect(host, port, user, password, isTextMode, isPassiveMode);
+			ftpclient.connect(ftpinfo.getHost(), ftpinfo.getPort(), ftpinfo.getUser(), 
+					ftpinfo.getPassword(), ftpinfo.isTextMode(), ftpinfo.isPassiveMode());
 			
-			if(!FTPUtils.setWorkingDirectory(ftppath)) {
-				logger.error("Invalid ftp path: " + ftppath, (Object)null); //$NON-NLS-1$
-				FTPUtils.disconnect();
+			if(!ftpclient.setWorkingDirectory(ftpinfo.getFtppath())) {
+				Stat.update_ThreadStatus(ftpinfo.getPid(), false); //记录本线程状态为异常
+				
+				logger.error("Invalid ftp path: " + ftpinfo.getFtppath()
+				+ " of host:" + ftpinfo.getHost() + " user:" + ftpinfo.getUser()
+				+ " password:" + ftpinfo.getPassword(), (Object)null); //$NON-NLS-1$
+				
+				ftpclient.disconnect();
 				return;
 			}
 			
+			File localfile;
 			//切换本地目录
 //			runtime.exec(cmd);
 			//逐个上传文件
 			for(FTPFile f: filelist) {
 				try {
 					if (fileMap != null && fileMap.containsKey(f.getName())) {
-						String newname = MyString.filepath(localpath, fileMap.get(f.getName()));
-						FTPUtils.download(f.getName(), new File(newname));
+						String newname = MyString.filepath(ftpinfo.getLocalpath(), fileMap.get(f.getName()));
+						localfile = new File(newname);
+						ftpclient.download(f.getName(), localfile);
+						
+						Stat.add_filesSuccess(); //统计传输成功的文件数
 						
 						if (logger.isInfoEnabled()) {
-							logger.info("downloading file: " + f.getName() 
-							+ " -> " + newname); //$NON-NLS-1$
+							logger.info("downloading file: " + ftpinfo.getHost() 
+							+ ":" + MyString.filepath(ftpinfo.getFtppath(), f.getName()) 
+							+ " -> " + localfile.getAbsolutePath()); //$NON-NLS-1$
+						}
+						//设置目标文件的修改时间与源文件一致
+						if(!localfile.setLastModified(f.getTimestamp().getTimeInMillis())) {
+							logger.warn("failed to set modify time "
+									+ "of file: " + localfile.getAbsolutePath(), (Object)null); //$NON-NLS-1$
 						}
 					} else if(fileMap != null) {
+						//文件名被脚本过滤，认为是非业务所需文件
 						logger.warn("file: " + f.getName() + 
 							" has no target name, will not be downloaded."); //$NON-NLS-1$
 					} else {
-						FTPUtils.download(f.getName(), 
-								new File(MyString.filepath(localpath, f.getName())));
-
+						localfile = new File(MyString.filepath(ftpinfo.getLocalpath(), f.getName()));
+						ftpclient.download(f.getName(), localfile);
+						
+						Stat.add_filesSuccess(); //统计传输成功的文件数
+						
 						if (logger.isInfoEnabled()) {
-							logger.info("downloading file: " + f.getName()); //$NON-NLS-1$
+							logger.info("downloading file: " + ftpinfo.getHost() 
+							+ ":" + MyString.filepath(ftpinfo.getFtppath(), f.getName()) 
+							+ " -> " + localfile.getAbsolutePath()); //$NON-NLS-1$
+						}
+						//设置目标文件的修改时间与源文件一致
+						if(!localfile.setLastModified(f.getTimestamp().getTimeInMillis())) {
+							logger.warn("failed to set modify time of file: " + localfile.getAbsolutePath(), (Object)null); //$NON-NLS-1$
 						}
 					}
-				} catch(Exception e) {
+				} catch(IOException e) {
+					Stat.add_filesFailed(); //记录传输失败文件数
 					logger.error("file download error - e=" + e, e); //$NON-NLS-1$
 				}
 			}
 			//断开连接
-			FTPUtils.disconnect();
+			ftpclient.disconnect();
 		} catch (IOException e) {
+			Stat.update_ThreadStatus(ftpinfo.getPid(), false); //记录本线程状态为异常
 			// TODO Auto-generated catch block
 			logger.error("FTP connection error - e=" + e, e); //$NON-NLS-1$
 		}

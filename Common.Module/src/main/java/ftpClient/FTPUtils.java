@@ -2,14 +2,14 @@ package ftpClient;
 
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
-import org.apache.commons.net.ftp.FTPClientConfig;
+//import org.apache.commons.net.ftp.FTPClientConfig;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPFileFilters;
 import org.apache.commons.net.ftp.FTPReply;
 
 
 import java.net.UnknownHostException;
-
+import java.text.SimpleDateFormat;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -21,12 +21,14 @@ import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class FTPUtils {
-	public static final String ANONYMOUS_LOGIN = "anonymous";
-    private static FTPClient ftp = new FTPClient();
-    private static boolean is_connected = false;
+
+	public final String ANONYMOUS_LOGIN = "anonymous";
+    private FTPClient ftp = new FTPClient();
+    private boolean is_connected = false;
     
 //	static {
 //		ftp.setDefaultTimeout(15 * 1000);
@@ -70,7 +72,7 @@ public class FTPUtils {
      * @throws IOException
      *             on I/O errors
      */
-    public static void connect(String host, int port, String user, String password, boolean isTextMode, boolean isPassiveMode) throws IOException {
+    public void connect(String host, int port, String user, String password, boolean isTextMode, boolean isPassiveMode) throws IOException {
         // Connect to server.
         try {
             ftp.connect(host, port);
@@ -125,7 +127,7 @@ public class FTPUtils {
      * @throws IOException
      *             on I/O errors
      */
-    public static void upload(String ftpFileName, File localFile) throws IOException {
+    public void upload(String ftpFileName, File localFile) throws IOException {
         // File check.
         if (!localFile.exists()) {
             throw new IOException("Can't upload '" + localFile.getAbsolutePath() + "'. This file doesn't exist.");
@@ -161,7 +163,7 @@ public class FTPUtils {
      * @throws IOException
      *             on I/O errors
      */
-    public static void download(String ftpFileName, File localFile) throws IOException {
+    public void download(String ftpFileName, File localFile) throws IOException {
         // Download.
         OutputStream out = null;
         try {
@@ -206,7 +208,7 @@ public class FTPUtils {
      * @throws IOException
      *             on I/O errors
      */
-    public static void remove(String ftpFileName) throws IOException {
+    public void remove(String ftpFileName) throws IOException {
         if (!ftp.deleteFile(ftpFileName)) {
             throw new IOException("Can't remove file '" + ftpFileName + "' from FTP server.");
         }
@@ -221,7 +223,7 @@ public class FTPUtils {
      * @throws IOException
      *             on I/O errors
      */
-    public static List<String> list(String filePath) throws IOException {
+    public List<String> list(String filePath) throws IOException {
         List<String> fileList = new ArrayList<String>();
         
         // Use passive mode to pass firewalls.
@@ -247,7 +249,7 @@ public class FTPUtils {
      * @throws IOException
      *             on I/O errors
      */
-    public static void sendSiteCommand(String args) throws IOException {
+    public void sendSiteCommand(String args) throws IOException {
         if (ftp.isConnected()) {
         	ftp.sendSiteCommand(args);
         }
@@ -255,14 +257,14 @@ public class FTPUtils {
 
     /**
      * Disconnects from the FTP server
-     * 
+     * 注意不能在disconnect()之前使用logout()，否则会导致异常出错
      * @throws IOException
      *             on I/O errors
      */
-    public static void disconnect() throws IOException {
+    public void disconnect() throws IOException {
 
 		if (ftp.isConnected()) {
-			ftp.logout();
+//			ftp.logout();
 			ftp.disconnect();
 		}
 		is_connected = false;
@@ -278,7 +280,7 @@ public class FTPUtils {
      *            local file
      * @return full name of the file on the FTP server
      */
-    public static String makeFTPFileName(String ftpPath, File localFile) {
+    public String makeFTPFileName(String ftpPath, File localFile) {
         if (ftpPath == "") {
             return localFile.getName();
         } else {
@@ -296,7 +298,7 @@ public class FTPUtils {
      * 
      * @return true, if connected
      */
-    public static boolean isConnected() {
+    public boolean isConnected() {
         return is_connected;
     }
 
@@ -306,7 +308,7 @@ public class FTPUtils {
      * @return current directory
      * @throws IOException 
      */
-    public static String getWorkingDirectory() throws IOException {
+    public String getWorkingDirectory() throws IOException {
         if (is_connected) {
         	return ftp.printWorkingDirectory();
         }
@@ -322,7 +324,7 @@ public class FTPUtils {
      * @return true, if working directory changed
      * @throws IOException 
      */
-    public static boolean setWorkingDirectory(String dir) throws IOException {
+    public boolean setWorkingDirectory(String dir) throws IOException {
         if (is_connected) {
         	return ftp.changeWorkingDirectory(dir);
         }
@@ -336,7 +338,7 @@ public class FTPUtils {
      * @return true, if working directory changed
      * @throws IOException 
      */
-    public static boolean setParentDirectory() throws IOException {
+    public boolean setParentDirectory() throws IOException {
         if (is_connected) {
         	return ftp.changeToParentDirectory();
         }
@@ -350,7 +352,7 @@ public class FTPUtils {
      * @return parent directory
      * @throws IOException 
      */
-    public static String getParentDirectory() throws IOException {
+    public String getParentDirectory() throws IOException {
         if (is_connected) {
         	String w = getWorkingDirectory();
             setParentDirectory();
@@ -368,23 +370,19 @@ public class FTPUtils {
     /**
      * Get directory contents on ftp server
      * 
-     * @param filePath
-     *            directory
      * @return list of dirInfo structures
      * @throws IOException
      */
-    public static List<FTPFile> listDirs(String filePath) throws IOException {
+    public List<FTPFile> listDirs() throws IOException {
         List<FTPFile> dirList = new ArrayList<FTPFile>();
         
         // Use passive mode to pass firewalls.
 //        ftp.enterLocalPassiveMode();
-        FTPFile[] ftpDirs = ftp.listFiles(filePath, FTPFileFilters.DIRECTORIES);
+        FTPFile[] ftpDirs = ftp.listFiles(null, FTPFileFilters.DIRECTORIES);
         int size = (ftpDirs == null) ? 0 : ftpDirs.length;
         for (int i = 0; i < size; i++) {
         	dirList.add(ftpDirs[i]);
         }
-        
-        System.out.println(dirList.size() + " dirs founded in " + filePath);
         
         return dirList;
     }
@@ -398,22 +396,78 @@ public class FTPUtils {
      * @return list of FTPFileInfo structures
      * @throws IOException
      */
-    public static List<FTPFile> listFiles(String filePath) throws IOException {
+    public List<FTPFile> listFiles() throws IOException {
         List<FTPFile> fileList = new ArrayList<FTPFile>();
         
         // Use passive mode to pass firewalls.
 //        ftp.enterLocalPassiveMode();
-        FTPFile[] ftpFiles = ftp.listFiles(filePath, FTPFileFilters.NON_NULL);
+        FTPFile[] ftpFiles = ftp.listFiles(null, FTPFileFilters.NON_NULL);
 //        FTPFile[] ftpFiles = ftp.listFiles(filePath);
         int size = (ftpFiles == null) ? 0 : ftpFiles.length;
         for (int i = 0; i < size; i++) {
-            fileList.add(ftpFiles[i]);
+        	if(ftpFiles[i].isFile()) {
+        		fileList.add(ftpFiles[i]);
+        	}
         }
-        //删除列表中的文件夹
-        List<FTPFile> dirList = listDirs(filePath);
-        fileList.removeAll(dirList);
         
-        System.out.println(fileList.size() + " files founded in " + filePath);
+        return fileList;
+    }
+    
+    
+    /**
+     * Get directory contents on ftp server
+     * 
+     * @param List<String> 文件名清单
+     *            
+     * @return list of FTPFileInfo structures
+     * @throws IOException
+     */
+    public List<FTPFile> listFiles(List<String> NameList) throws IOException {
+        List<FTPFile> fileList = new ArrayList<FTPFile>();
+        
+        // Use passive mode to pass firewalls.
+//        ftp.enterLocalPassiveMode();
+        StringBuffer buf = new StringBuffer();
+        
+        for(String name : NameList) {
+        	buf.append(" " + name);
+        }
+        
+        FTPFile[] ftpFiles = ftp.listFiles(buf.toString(), FTPFileFilters.NON_NULL);
+//        FTPFile[] ftpFiles = ftp.listFiles(filePath);
+        int size = (ftpFiles == null) ? 0 : ftpFiles.length;
+        for (int i = 0; i < size; i++) {
+        	if(ftpFiles[i].isFile()) {
+        		fileList.add(ftpFiles[i]);
+        	}
+        }
+        
+        return fileList;
+    }
+    
+    
+    /**
+     * Get directory contents on ftp server
+     * 
+     * @param String regex 关键字通配符
+     *            
+     * @return list of FTPFileInfo structures
+     * @throws IOException
+     */
+    public List<FTPFile> listFiles(String regex) throws IOException {
+        List<FTPFile> fileList = new ArrayList<FTPFile>();
+        
+        // Use passive mode to pass firewalls.
+//        ftp.enterLocalPassiveMode();
+        
+        FTPFile[] ftpFiles = ftp.listFiles(regex, FTPFileFilters.NON_NULL);
+//        FTPFile[] ftpFiles = ftp.listFiles(filePath);
+        int size = (ftpFiles == null) ? 0 : ftpFiles.length;
+        for (int i = 0; i < size; i++) {
+        	if(ftpFiles[i].isFile()) {
+        		fileList.add(ftpFiles[i]);
+        	}
+        }
         
         return fileList;
     }
@@ -456,7 +510,7 @@ public class FTPUtils {
      *            OutputStream
      * @throws IOException
      */
-    public static void getFile(String ftpFileName, OutputStream out) throws IOException {
+    public void getFile(String ftpFileName, OutputStream out) throws IOException {
         try {
             // Use passive mode to pass firewalls.
 //            ftp.enterLocalPassiveMode();
@@ -500,7 +554,7 @@ public class FTPUtils {
      *            InputStream
      * @throws IOException
      */
-    public static void putFile(String ftpFileName, InputStream in) throws IOException {
+    public void putFile(String ftpFileName, InputStream in) throws IOException {
         try {
             // Use passive mode to pass firewalls.
 //            ftp.enterLocalPassiveMode();
@@ -514,5 +568,27 @@ public class FTPUtils {
             } catch (IOException ex) {
             }
         }
+    }
+    
+    
+    /**
+     * 设置FTP文件的修改时间
+     * @param ftpFileName
+     * @param date
+     * @return
+     */
+    public boolean set_ModifyTime(String ftpFileName, long milliseconds) {
+    	
+    	SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+    	Date filetime = new Date(milliseconds);
+    	
+    	try {
+    		boolean timeset =  ftp.setModificationTime(ftpFileName, sdf.format(filetime));
+    		return timeset;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
     }
 }
