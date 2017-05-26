@@ -13,14 +13,15 @@ public class MyWildCard {
 	/**
 	 * 因为存在多线程对静态私有变量同时进行读写的可能，需要对相关的public方法加上同步synchronized修饰
 	 * @param code 待转码的通配符关键字
-	 * @param FTP boolean变量，
-	 * true为FTP通配符，带通配符星号*；
-	 * false为本地文件名过滤器的正则表达式，不带通配符星号*，而是用.{0,}，等效于星号*(任意长度的任意字符)；
+	 * @param type 整型变量，
+	 * 0为FTP文件名通配符，带通配符星号*；
+	 * 1为本地文件名过滤器的正则表达式，不带通配符星号*，而是用.{0,}，等效于星号*(任意长度的任意字符)；
+	 * 2为路径字符串，不带通配符等特殊字符；
 	 * 隐患：用户提供的文件名关键字中包含小数点.符号的话，在正则表达式中会被认为是匹配单个任意字符，
 	 * 目前还没发现因此导致的问题
 	 * @return 返回解码后的通配符关键字
 	 */
-	public static synchronized String decode(String code, boolean isFTP) {
+	public static synchronized String decode(String code, int type) {
 		
 		if(code.isEmpty()) {
 			System.out.println("empty wildcard.");
@@ -28,26 +29,37 @@ public class MyWildCard {
 		}
 		
 		resultTime.setTime(beginTime);
+		String result;
 		
-		//返回值前后各补上一个星号*
-		String result = "*" + splitCode(code) + "*";
-//		System.out.println("result_return: " + result);
-		
-		//多个连续的星号*替换成一个*
-		result = result.replaceAll("\\*+", "\\*");
-//		System.out.println("result_raw: " + result);
-		
-		if(!isFTP) {
+		//路径字符串中不包含通配符等特殊字符
+		if(type == 2) {
+			result =  splitCode(code);
+		//FTP文件名关键字
+		} else if(type == 0) {
+			//返回值前后各补上一个星号*
+			result = "*" + splitCode(code) + "*";
+			//多个连续的星号*替换成一个*
+			result = result.replaceAll("\\*+", "\\*");
+		//本地文件名关键字
+		} else if(type == 1) {
+			//返回值前后各补上一个星号*
+			result = "*" + splitCode(code) + "*";
+			//多个连续的星号*替换成一个*
+			result = result.replaceAll("\\*+", "\\*");
 			//JAVA代码中必须用"\\.{0,}"表示".{0,}"，正则表达式".{0,}"与通配符星号*等效，用"\\*"表示星号*
 			result = result.replaceAll("\\*", "\\.{0,}");
+		} else {
+			System.out.println("unknown type of " + type);
+			throw new IllegalArgumentException("unsupported code type: "
+					+ type + " , must >= 0 and <= 2.");
 		}
-//		System.out.println("result: " + result);
+		
 		return result;
 		
 	}
 	
 	/**
-	 * 按大括号提取时间变量
+	 * 提取翻译字符串中的时间变量，以大括号为分隔符
 	 * @param code
 	 * @return
 	 */
@@ -63,7 +75,7 @@ public class MyWildCard {
 			String timeStr = translate(code.substring(i+1, j)); //中间段，大括号内的部分，时间变量
 			String postfix = splitCode(code.substring(j+1)); //后置段，可能包含时间变量，用递归继续判断
 			
-			System.out.println("prefix: " + prefix);
+//			System.out.println("prefix: " + prefix);
 			
 			return prefix + timeStr + postfix;
 		//不包含任何时间变量字符串{...}，直接返回原值
@@ -82,7 +94,7 @@ public class MyWildCard {
 	 * @return
 	 */
 	private static String translate(String timeStr) {
-		System.out.println("translate: " + timeStr);
+//		System.out.println("translate: " + timeStr);
 		
 		int num;
 		String[] sections;

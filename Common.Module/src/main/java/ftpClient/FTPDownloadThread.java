@@ -80,6 +80,7 @@ public class FTPDownloadThread extends Thread {
 			ftpclient.connect(ftpinfo.getHost(), ftpinfo.getPort(), ftpinfo.getUser(), 
 					ftpinfo.getPassword(), ftpinfo.isTextMode(), ftpinfo.isPassiveMode());
 			
+			//FTP路径不存在
 			if(!ftpclient.setWorkingDirectory(ftpinfo.getFtppath())) {
 				Stat.update_ThreadStatus(ftpinfo.getPid(), false); //记录本线程状态为异常
 				
@@ -87,6 +88,27 @@ public class FTPDownloadThread extends Thread {
 				+ " of host:" + ftpinfo.getHost() + " user:" + ftpinfo.getUser()
 				+ " password:" + ftpinfo.getPassword(), (Object)null); //$NON-NLS-1$
 				
+				ftpclient.disconnect();
+				return;
+			}
+			
+			//检查本地路径是否存在，不存在则创建
+			File localDir = new File(ftpinfo.getLocalpath());
+			
+			if(!localDir.exists() && !localDir.mkdirs()) {
+				Stat.update_ThreadStatus(ftpinfo.getPid(), false); // 记录本线程状态为异常
+				
+				logger.error("Failed to create Directory: " + ftpinfo.getLocalpath(), 
+						(Object) null); //$NON-NLS-1$
+
+				ftpclient.disconnect();
+				return;
+			} else if(localDir.exists() && !localDir.isDirectory()) {
+				Stat.update_ThreadStatus(ftpinfo.getPid(), false); // 记录本线程状态为异常
+				
+				logger.error("Path: " + ftpinfo.getLocalpath() + " is not a Directory.", 
+						(Object) null); //$NON-NLS-1$
+
 				ftpclient.disconnect();
 				return;
 			}
@@ -145,6 +167,10 @@ public class FTPDownloadThread extends Thread {
 			Stat.update_ThreadStatus(ftpinfo.getPid(), false); //记录本线程状态为异常
 			// TODO Auto-generated catch block
 			logger.error("FTP connection error - e=" + e, e); //$NON-NLS-1$
+		} catch (Exception e) {
+			Stat.update_ThreadStatus(ftpinfo.getPid(), false); //记录本线程状态为异常
+			// TODO Auto-generated catch block
+			logger.error("FTP download error - e=" + e, e); //$NON-NLS-1$
 		}
 	}
 

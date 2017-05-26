@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import ftpClient.*;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -24,12 +25,7 @@ public class App {
 		
 		if(args.length >= 1) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("config file content examples: " + System.lineSeparator() 
-				+ "-upload 3600 /mnt/data_nfs/ {-8hour.yyyyMMdd} 10.16.36.21 21 ftp ftp "
-				+ "/itemdata {-8hour.yyyyMMdd} binary PASSIVE"
-				+ System.lineSeparator()
-				+ "-download 3600 /mnt/data_nfs/ {yyyyMMdd} 10.16.36.21 21 ftp ftp "
-				+ "/itemdata {yyyyMMdd} textmode PASSIVE namefilter.sh"); //$NON-NLS-1$
+				logger.debug("program begins at " + new Date().toString()); //$NON-NLS-1$
 			}
 			
 			//读取配置文件
@@ -56,7 +52,7 @@ public class App {
 			int i = 0;
 			for(String line : content) {
 				
-				if(line.trim().startsWith("#")) {
+				if(line.trim().startsWith("#") || line.trim().isEmpty()) {
 					continue; //认为是空行或注释信息，直接跳过下面的语句不予执行
 				}
 				
@@ -67,8 +63,18 @@ public class App {
 						logger.info("Formatted paras of ftp Thread: " + ftpinfo.toString()); //$NON-NLS-1$
 					}
 					
-					FTPCompleteThread ct = new FTPCompleteThread(ftpinfo);
-					exec.submit(ct);
+//					FTPCompleteThread ct = new FTPCompleteThread(ftpinfo);
+					
+					if(ftpinfo.getType().toLowerCase().contains("download")) {
+						exec.submit(new FileGetThread(ftpinfo));
+					} else if(ftpinfo.getType().toLowerCase().contains("upload")) {
+						exec.submit(new FilePutThread(ftpinfo));
+					} else {
+						Stat.add_invalidArg(); //统计不正确参数行
+						logger.error("unknown transfer type: "
+								+ ftpinfo.getType() + ", Paras: " 
+								+ ftpinfo.toString(), (Object)null);
+					}
 				} catch (IllegalArgumentException e) {
 					Stat.add_invalidArg(); //统计不正确参数行
 					logger.error("main(String[]) - e=" + e, e); //$NON-NLS-1$

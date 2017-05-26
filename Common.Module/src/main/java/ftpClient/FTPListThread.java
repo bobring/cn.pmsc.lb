@@ -42,16 +42,31 @@ public class FTPListThread extends Thread {
 //			ftpclient.connect(host, port, user, password, isTextMode, isPassiveMode);
 			
 			//切换当前目录到指定路径
-			if(!ftpclient.setWorkingDirectory(ftpinfo.getFtppath())) {
-				Stat.update_ThreadStatus(ftpinfo.getPid(), false); //记录本线程状态为异常
-				
-				logger.error("Invalid ftp path: " + ftpinfo.getFtppath()
-				+ " of host:" + ftpinfo.getHost() + " user:" + ftpinfo.getUser()
-				+ " password:" + ftpinfo.getPassword(), (Object)null); //$NON-NLS-1$
-				
-				ftpclient.disconnect();
-				return;
+			if (!ftpclient.setWorkingDirectory(ftpinfo.getFtppath())) {
+				if(!ftpclient.makeDirs(ftpinfo.getFtppath()) 
+						|| !ftpclient.setWorkingDirectory(ftpinfo.getFtppath())) {
+					// 文件夹不存在，尝试自行创建，若创建失败，则报错
+					Stat.update_ThreadStatus(ftpinfo.getPid(), false); // 记录本线程状态为异常
+
+					logger.error("Invalid ftp path: " + ftpinfo.getFtppath() 
+							+ " of host:" + ftpinfo.getHost() + " user:" 
+							+ ftpinfo.getUser() + " password:" 
+							+ ftpinfo.getPassword(), (Object) null); //$NON-NLS-2$
+
+					ftpclient.disconnect();
+					return;
+				}
 			}
+//			if(!ftpclient.setWorkingDirectory(ftpinfo.getFtppath())) {
+//				Stat.update_ThreadStatus(ftpinfo.getPid(), false); //记录本线程状态为异常
+//				
+//				logger.error("Invalid ftp path: " + ftpinfo.getFtppath()
+//				+ " of host:" + ftpinfo.getHost() + " user:" + ftpinfo.getUser()
+//				+ " password:" + ftpinfo.getPassword(), (Object)null); //$NON-NLS-1$
+//				
+//				ftpclient.disconnect();
+//				return;
+//			}
 			
 			//取得FTP当前路径下的文件清单
 			ftpfilelist = ftpclient.listFiles(ftpinfo.getFtp_wildcard());

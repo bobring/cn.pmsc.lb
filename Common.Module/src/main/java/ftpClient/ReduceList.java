@@ -67,19 +67,23 @@ public class ReduceList {
 				InputStream fes = process.getErrorStream();
 				BufferedReader er = new BufferedReader(new InputStreamReader(fes));
 
-				String line = null;
+				String line;
 
-				while (!(line = br.readLine()).isEmpty()) {
-					if (logger.isInfoEnabled()) {
-						logger.info("run() - line={}", line); //$NON-NLS-1$
+				while ((line = br.readLine()) != null && !line.isEmpty()) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("run() - line={}", line); //$NON-NLS-1$
 					}
-					str = line.split("\\s+");
+
+//					if (logger.isInfoEnabled()) {
+//						logger.info("run() - line={}", line); //$NON-NLS-1$
+//					}
+					str = line.trim().split("\\s+");
 					if (str.length >= 2 && names.contains(str[0])) {
 						FileNameMap.put(str[0], str[1]);
 					}
 				}
 
-				while (!(line = er.readLine()).isEmpty()) {
+				while ((line = er.readLine()) != null && !line.isEmpty()) {
 					logger.error("run() - line=" + line);
 				}
 

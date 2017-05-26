@@ -82,8 +82,7 @@ public class MyString {
 	 * @return
 	 */
 	public static String filepath(String path, String filename) {
-		if(path.lastIndexOf(File.separator) == path.length() - 1
-				&& !path.isEmpty()) {
+		if(path.endsWith(File.separator)) {
 			return path + filename;
 		} else if(!path.isEmpty()) {
 			return path + File.separator + filename;

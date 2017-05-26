@@ -29,76 +29,76 @@ public class FtpInfo {
 	/**
 	 * 认定参数行中只有空格作为分隔符，不包含双引号，每个独立参数中均不带空格
 	 */
-	public FtpInfo(String[] args, int pid, String Parent_Path) {
-		super();
-		
-		if ((this.paras_num = args.length) >= paras_num_min) {
-			this.type = args[0];
-			
-			try {
-				this.seconds = Integer.parseInt(args[1]);
-			} catch (NumberFormatException e) {
-				throw new IllegalArgumentException("Invalid Integer: \""
-						+ args[1] + "\" in paras: " + args);
-			}
-			
-			try {
-				this.port = Integer.parseInt(args[5]);
-			} catch (NumberFormatException e) {
-				throw new IllegalArgumentException("Invalid Integer: \""
-						+ args[5] + "\" in paras: " + args);
-			}
-			
-			try {
-				this.local_wildcard = MyWildCard.decode(args[3], false);
-			} catch (Exception e) {
-				throw new IllegalArgumentException("Invalid Integer: \""
-						+ args[3] + "\" in paras: " + args);
-			}
-			
-			this.localpath = args[2];
-			this.host = args[4];
-			this.user = args[6];
-			this.password = args[7];
-			this.ftppath = args[8];
-			
-			
-			if (this.paras_num >= paras_num_min + 2) {
-				try {
-					this.ftp_wildcard = MyWildCard.decode(args[9], true);
-				} catch (Exception e) {
-					throw new IllegalArgumentException("Invalid Integer: \""
-							+ args[9] + "\" in paras: " + args);
-				}
-				
-				this.isTextMode = toTextMode(args[10]);
-				this.isPassiveMode = toPassiveMode(args[11]);
-				this.shellfile = MyString.filepath(Parent_Path, args[paras_num_min]);
-			} else {
-				try {
-					this.ftp_wildcard = MyWildCard.decode(args[3], true);
-				} catch (Exception e) {
-					throw new IllegalArgumentException("Invalid Integer: \""
-							+ args[3] + "\" in paras: " + args);
-				}
-				
-				this.isTextMode = toTextMode(args[9]);
-				this.isPassiveMode = toPassiveMode(args[10]);
-				this.shellfile = null;
-			}
-			
-			this.pid = pid;
-			
-		} else if (this.paras_num >= paras_num_min - 2 && paras_num_min > 2) {
-//			//统计错误参数，数量只少了2个以内，认为是用户输入错误
-			throw new IllegalArgumentException("Invalid number "
-					+ "of paras: " + args);
-		} else {
-			//其他情况，认为是用户输入的无效参数如注释或空行，不做统计
-			throw new NullPointerException("Invalid number "
-					+ "of paras: " + args);
-		}
-	}
+//	public FtpInfo(String[] args, int pid, String Parent_Path) {
+//		super();
+//		
+//		if ((this.paras_num = args.length) >= paras_num_min) {
+//			this.type = args[0];
+//			
+//			try {
+//				this.seconds = Integer.parseInt(args[1]);
+//			} catch (NumberFormatException e) {
+//				throw new IllegalArgumentException("Invalid Integer: \""
+//						+ args[1] + "\" in paras: " + args);
+//			}
+//			
+//			try {
+//				this.port = Integer.parseInt(args[5]);
+//			} catch (NumberFormatException e) {
+//				throw new IllegalArgumentException("Invalid Integer: \""
+//						+ args[5] + "\" in paras: " + args);
+//			}
+//			
+//			try {
+//				this.local_wildcard = MyWildCard.decode(args[3], false);
+//			} catch (Exception e) {
+//				throw new IllegalArgumentException("Invalid Integer: \""
+//						+ args[3] + "\" in paras: " + args);
+//			}
+//			
+//			this.localpath = args[2];
+//			this.host = args[4];
+//			this.user = args[6];
+//			this.password = args[7];
+//			this.ftppath = args[8];
+//			
+//			
+//			if (this.paras_num >= paras_num_min + 2) {
+//				try {
+//					this.ftp_wildcard = MyWildCard.decode(args[9], true);
+//				} catch (Exception e) {
+//					throw new IllegalArgumentException("Invalid Integer: \""
+//							+ args[9] + "\" in paras: " + args);
+//				}
+//				
+//				this.isTextMode = toTextMode(args[10]);
+//				this.isPassiveMode = toPassiveMode(args[11]);
+//				this.shellfile = MyString.filepath(Parent_Path, args[paras_num_min]);
+//			} else {
+//				try {
+//					this.ftp_wildcard = MyWildCard.decode(args[3], true);
+//				} catch (Exception e) {
+//					throw new IllegalArgumentException("Invalid Integer: \""
+//							+ args[3] + "\" in paras: " + args);
+//				}
+//				
+//				this.isTextMode = toTextMode(args[9]);
+//				this.isPassiveMode = toPassiveMode(args[10]);
+//				this.shellfile = null;
+//			}
+//			
+//			this.pid = pid;
+//			
+//		} else if (this.paras_num >= paras_num_min - 2 && paras_num_min > 2) {
+////			//统计错误参数，数量只少了2个以内，认为是用户输入错误
+//			throw new IllegalArgumentException("Invalid number "
+//					+ "of paras: " + args);
+//		} else {
+//			//其他情况，认为是用户输入的无效参数如注释或空行，不做统计
+//			throw new NullPointerException("Invalid number "
+//					+ "of paras: " + args);
+//		}
+//	}
 	
 	
 	/**
@@ -119,48 +119,62 @@ public class FtpInfo {
 				this.seconds = Integer.parseInt(args.get(1));
 			} catch (NumberFormatException e) {
 				throw new IllegalArgumentException("Invalid Integer: \""
-						+ args.get(1) + "\" in paras: " + args);
+						+ args.get(1) + "\" in paras: " + line);
 			}
 			
 			try {
 				this.port = Integer.parseInt(args.get(5));
 			} catch (NumberFormatException e) {
 				throw new IllegalArgumentException("Invalid Integer: \""
-						+ args.get(5) + "\" in paras: " + args);
+						+ args.get(5) + "\" in paras: " + line);
 			}
 			
 			try {
-				this.local_wildcard = MyWildCard.decode(args.get(3), false);
+				this.local_wildcard = MyWildCard.decode(args.get(3), 1);
 			} catch (Exception e) {
-				throw new IllegalArgumentException("Invalid Integer: \""
-						+ args.get(3) + "\" in paras: " + args);
+				throw new IllegalArgumentException("Invalid para: \""
+						+ args.get(3) + "\" in paras: " + line);
 			}
 			
-			this.localpath = args.get(2);
+			try {
+				this.localpath = MyWildCard.decode(args.get(2), 2);
+			} catch (Exception e) {
+				throw new IllegalArgumentException("Invalid para: \""
+						+ args.get(2) + "\" in paras: " + line);
+			}
+			
+//			this.localpath = args.get(2);
 			this.host = args.get(4);
 			this.user = args.get(6);
 			this.password = args.get(7);
-			this.ftppath = args.get(8);
+//			this.ftppath = args.get(8);
+			
+			try {
+				this.ftppath = MyWildCard.decode(args.get(8), 2);
+			} catch (Exception e) {
+				throw new IllegalArgumentException("Invalid para: \""
+						+ args.get(8) + "\" in paras: " + line);
+			}
 			
 			//输入参数为13位，即存在上传下载存在重命名需求，本地文件和FTP文件各自的通配符不一样
 			if (this.paras_num >= paras_num_min + 2) {
 				try {
-					this.ftp_wildcard = MyWildCard.decode(args.get(9), true);
+					this.ftp_wildcard = MyWildCard.decode(args.get(9), 0);
 				} catch (Exception e) {
-					throw new IllegalArgumentException("Invalid Integer: \""
-							+ args.get(9) + "\" in paras: " + args);
+					throw new IllegalArgumentException("Invalid para: \""
+							+ args.get(9) + "\" in paras: " + line);
 				}
 				
 				this.isTextMode = toTextMode(args.get(10));
 				this.isPassiveMode = toPassiveMode(args.get(11));
-				this.shellfile = MyString.filepath(Parent_Path, args.get(paras_num_min));
+				this.shellfile = MyString.filepath(Parent_Path, args.get(paras_num-1));
 			} else {
 				//输入参数为11位，即上传下载文件名一致，本地文件和FTP文件使用相同的通配符
 				try {
-					this.ftp_wildcard = MyWildCard.decode(args.get(3), true);
+					this.ftp_wildcard = MyWildCard.decode(args.get(3), 0);
 				} catch (Exception e) {
-					throw new IllegalArgumentException("Invalid Integer: \""
-							+ args.get(3) + "\" in paras: " + args);
+					throw new IllegalArgumentException("Invalid para: \""
+							+ args.get(3) + "\" in paras: " + line);
 				}
 				
 				this.isTextMode = toTextMode(args.get(9));
@@ -173,11 +187,11 @@ public class FtpInfo {
 		} else if (this.paras_num >= paras_num_min - 2 && paras_num_min > 2) {
 //			//统计错误参数，数量只少了2个以内，认为是用户输入错误
 			throw new IllegalArgumentException("Invalid number "
-					+ "of paras: " + args);
+					+ "of paras: " + line);
 		} else {
 			//其他情况，认为是用户输入的无效参数如注释或空行，不做统计
 			throw new NullPointerException("Invalid number "
-					+ "of paras: " + args);
+					+ "of paras: " + line);
 		}
 	}
 	

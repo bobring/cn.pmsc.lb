@@ -39,6 +39,12 @@ public class FilePutThread extends Thread {
 		ReduceList.NameFilter namefilter;
 		Map<String, String> fileMap;
 		
+//		if(!ftpinfo.getType().toLowerCase().contains("upload")) {
+//			Stat.update_ThreadStatus(ftpinfo.getPid(), false); //记录本线程状态为异常
+//			logger.error("unknown transfer type: " + ftpinfo.getType(), (Object)null);
+//			return;
+//		}
+		
 		Stat.update_ThreadStatus(ftpinfo.getPid(), true); //初始化线程状态为正常
 		
 		//获取已存在的FTP文件清单和本地文件清单
@@ -68,7 +74,7 @@ public class FilePutThread extends Thread {
 		}
 		
 		
-		//计算待上传或下载的文件清单
+		//计算待上传的文件清单
 		
 		////利用时间区间精简文件清单，从当前时间倒退的秒数小于等于0，认为此项无效
 		if(ftpinfo.getSeconds() > 0) {
@@ -81,8 +87,8 @@ public class FilePutThread extends Thread {
 		diff = new ReduceList();
 		
 		
-		//上传业务且带重命名脚本
-		if(ftpinfo.getType().toLowerCase().contains("upload") && ftpinfo.getShellfile() != null) {
+		////上传业务且带重命名脚本
+		if(ftpinfo.getShellfile() != null) {
 			namefilter = diff.new NameFilter(ftpinfo.getShellfile(), ReduceList.get_NameList(localfiles));
 			try {
 				//超时设置为2分钟，即120秒
@@ -93,32 +99,16 @@ public class FilePutThread extends Thread {
 				return;
 			}
 			fileMap = namefilter.getFileNameMap();
-			ReduceList.get_TransList(ftpfiles, localfiles, fileMap);
-		//上传业务
-		} else if(ftpinfo.getType().toLowerCase().contains("upload")) {
-			fileMap = null;
-			ReduceList.get_TransList(ftpfiles, localfiles, fileMap);
+		////上传业务
 		} else {
-			Stat.update_ThreadStatus(ftpinfo.getPid(), false); //记录本线程状态为异常
-			logger.error("unknown transfer type: " + ftpinfo.getType(), (Object)null);
-			return;
+			fileMap = null;
 		}
+		////清理本地文件中的重复项
+		ReduceList.get_TransList(ftpfiles, localfiles, fileMap);
 		
 		
-		//执行FTP上传或下载任务
-		if(ftpinfo.getType().equalsIgnoreCase("-download") && !ftpfiles.isEmpty()) {
-			FTPDownloadThread downloadT = new FTPDownloadThread(
-					ftpinfo, ftpfiles, fileMap);
-			try {
-				//超时设置为毫秒
-				TimeoutController.execute(downloadT, downloadT.getTrans_period() * 1000);
-			} catch (TimeoutException e) {
-				Stat.update_ThreadStatus(ftpinfo.getPid(), false); //记录本线程状态为异常
-				logger.error("run() - e=" + e, e); //$NON-NLS-1$
-				return;
-			}
-			
-		} else if(ftpinfo.getType().equalsIgnoreCase("-upload") && !localfiles.isEmpty()) {
+		//执行FTP上传任务
+		if(!localfiles.isEmpty()) {
 			FTPUploadThread uploadT = new FTPUploadThread(ftpinfo, 
 					localfiles, fileMap);
 			try {

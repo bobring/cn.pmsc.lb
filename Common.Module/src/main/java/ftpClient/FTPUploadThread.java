@@ -77,14 +77,19 @@ public class FTPUploadThread extends Thread {
 					ftpinfo.getPassword(), ftpinfo.isTextMode(), ftpinfo.isPassiveMode());
 			
 			if (!ftpclient.setWorkingDirectory(ftpinfo.getFtppath())) {
-				Stat.update_ThreadStatus(ftpinfo.getPid(), false); //记录本线程状态为异常
-				
-				logger.error("Invalid ftp path: " + ftpinfo.getFtppath()
-				+ " of host:" + ftpinfo.getHost() + " user:" + ftpinfo.getUser()
-				+ " password:" + ftpinfo.getPassword(), (Object)null); //$NON-NLS-1$
-				
-				ftpclient.disconnect();
-				return;
+				if(!ftpclient.makeDirs(ftpinfo.getFtppath()) 
+						|| !ftpclient.setWorkingDirectory(ftpinfo.getFtppath())) {
+					// 文件夹不存在，尝试自行创建，若创建失败，则报错
+					Stat.update_ThreadStatus(ftpinfo.getPid(), false); // 记录本线程状态为异常
+
+					logger.error("Invalid ftp path: " + ftpinfo.getFtppath() 
+							+ " of host:" + ftpinfo.getHost() + " user:" 
+							+ ftpinfo.getUser() + " password:" 
+							+ ftpinfo.getPassword(), (Object) null); //$NON-NLS-2$
+
+					ftpclient.disconnect();
+					return;
+				}
 			}
 			
 			//逐个上传文件
@@ -142,6 +147,10 @@ public class FTPUploadThread extends Thread {
 			// TODO Auto-generated catch block
 			Stat.update_ThreadStatus(ftpinfo.getPid(), false); //记录本线程状态为异常
 			logger.error("FTP connection error - e=" + e, e); //$NON-NLS-1$
+		} catch (Exception e) {
+			Stat.update_ThreadStatus(ftpinfo.getPid(), false); //记录本线程状态为异常
+			// TODO Auto-generated catch block
+			logger.error("FTP upload error - e=" + e, e); //$NON-NLS-1$
 		}
 	}
 

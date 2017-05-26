@@ -331,6 +331,78 @@ public class FTPUtils {
 
         return false;
     }
+    
+    /**
+     * Make directory on ftp server
+     * 
+     * @param dir
+     *            new directory
+     * @return true, if making directory succeeded
+     * @throws IOException 
+     */
+    public boolean makeDirectory(String dir) throws IOException {
+        if (is_connected) {
+        	return ftp.makeDirectory(dir);
+        }
+
+        return false;
+    }
+    
+    /**
+     * 递归创建多级目录
+     * @param dirs 不包含"/"号的多级目录清单
+     * @param i 多级目录中的某一级的序号
+     * @return
+     * @throws IOException
+     */
+    private boolean makeDir(String[] dirs, int i) throws IOException {
+    	if(!is_connected) {
+    		return false;
+    	}
+    	
+    	if(i < dirs.length) {
+    		if(!dirs[i].isEmpty()) {
+    			if(setWorkingDirectory(dirs[i])) {
+    				return makeDir(dirs, i+1); //正常情况，目录名非空且已存在并进入成功
+    			} else if(makeDirectory(dirs[i]) && setWorkingDirectory(dirs[i])) {
+    				return makeDir(dirs, i+1); //正常情况，目录名非空且不存在，但是创建并进入成功
+    			} else {
+    				return false; //失败情况，目录名非空且不存在，创建失败或创建成功后进入失败
+    			}
+    		} else {
+    			return makeDir(dirs, i+1); //目录名为空，尝试下一级目录
+    		}
+    	}
+
+        return true;
+    }
+    /**
+     * 创建多级目录
+     * 
+     * @param dir
+     *            new directory
+     * @return true, if making directory succeeded
+     * @throws IOException 
+     */
+    public boolean makeDirs(String dir) throws IOException {
+    	String[] dirs = dir.trim().split("/");
+    	String WorkingDir;
+    	
+    	if(!is_connected) {
+    		return false;
+    	}
+    	
+    	if(dir.indexOf("/") == 0) {
+    		WorkingDir = "/"; //输入路径为绝对路径，初级目录为根目录，尝试进入，成功后再递归
+    		if(!setWorkingDirectory(WorkingDir)) {
+    			return false;
+    		} else {
+    			return makeDir(dirs, 1);
+    		}
+    	} else {
+    		return makeDir(dirs, 0); //没找到"/"符号，说明只有1级相对目录，或者是其他情况，直接递归
+    	}
+    }
 
     /**
      * Change working directory on ftp server to parent directory
