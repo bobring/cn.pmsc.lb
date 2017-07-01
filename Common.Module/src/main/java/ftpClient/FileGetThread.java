@@ -53,13 +53,21 @@ public class FileGetThread extends Thread {
 			//超时设置为2分钟，即120秒
 			TimeoutController.execute(ftplistT, 120000);
 			ftpfiles = ftplistT.getFtpfilelist();
+		} catch(TimeoutException e) {
+			logger.error("run() - get file info from "
+					+ ftpinfo.getHost() + " time out, e= " + e, e); //$NON-NLS-1$
 			
+			Stat.update_ThreadStatus(ftpinfo.getPid(), false); //记录本线程状态为异常
+		}
+		
+		try {
 			LocalFileListThread locallistT = new LocalFileListThread(ftpinfo);
 			//超时设置为2分钟，即120秒
 			TimeoutController.execute(locallistT, 120000);
 			localfiles = locallistT.getLocalfilelist();
 		} catch(TimeoutException e) {
-			logger.error("run() - e=" + e, e); //$NON-NLS-1$
+			logger.error("run() - get file info from "
+					+ ftpinfo.getLocalpath() + " time out, e= " + e, e); //$NON-NLS-1$
 			
 			Stat.update_ThreadStatus(ftpinfo.getPid(), false); //记录本线程状态为异常
 			
@@ -67,6 +75,7 @@ public class FileGetThread extends Thread {
 				localfiles = new ArrayList<File>();
 			}
 		}
+		
 		
 		//无待传文件，直接返回
 		if(ftpfiles == null || ftpfiles.isEmpty()) {
@@ -95,7 +104,8 @@ public class FileGetThread extends Thread {
 				TimeoutController.execute(namefilter, 120000);
 			} catch(TimeoutException e) {
 				Stat.update_ThreadStatus(ftpinfo.getPid(), false); //记录本线程状态为异常
-				logger.error("run() - e=" + e, e); //$NON-NLS-1$
+				logger.error("run() - get rename file info from shell file "
+						+ ftpinfo.getShellfile() + " time out, e= " + e, e); //$NON-NLS-1$
 				return;
 			}
 			fileMap = namefilter.getFileNameMap();
@@ -115,7 +125,8 @@ public class FileGetThread extends Thread {
 				TimeoutController.execute(downloadT, downloadT.getTrans_period() * 1000);
 			} catch (TimeoutException e) {
 				Stat.update_ThreadStatus(ftpinfo.getPid(), false); //记录本线程状态为异常
-				logger.error("run() - e=" + e, e); //$NON-NLS-1$
+				logger.error("run() - download file from  "
+						+ ftpinfo.getHost() + " time out, e= " + e, e); //$NON-NLS-1$
 				return;
 			}
 		}

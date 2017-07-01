@@ -47,25 +47,33 @@ public class FilePutThread extends Thread {
 		
 		Stat.update_ThreadStatus(ftpinfo.getPid(), true); //初始化线程状态为正常
 		
-		//获取已存在的FTP文件清单和本地文件清单
+		//获取已存在的FTP文件清单
 		try {
 			FTPListThread ftplistT = new FTPListThread(ftpinfo);
 			//超时设置为2分钟，即120秒
 			TimeoutController.execute(ftplistT, 120000);
 			ftpfiles = ftplistT.getFtpfilelist();
-			
-			LocalFileListThread locallistT = new LocalFileListThread(ftpinfo);
-			//超时设置为2分钟，即120秒
-			TimeoutController.execute(locallistT, 120000);
-			localfiles = locallistT.getLocalfilelist();
 		} catch(TimeoutException e) {
-			logger.error("run() - e=" + e, e); //$NON-NLS-1$
+			logger.error("run() - get file info from "
+					+ ftpinfo.getHost() + " time out, e= " + e, e); //$NON-NLS-1$
 			
 			Stat.update_ThreadStatus(ftpinfo.getPid(), false); //记录本线程状态为异常
 			
 			if(ftpfiles == null) {
 				ftpfiles = new ArrayList<FTPFile>();
 			}
+		}
+		//获取已存在的本地文件清单
+		try {
+			LocalFileListThread locallistT = new LocalFileListThread(ftpinfo);
+			//超时设置为2分钟，即120秒
+			TimeoutController.execute(locallistT, 120000);
+			localfiles = locallistT.getLocalfilelist();
+		} catch(TimeoutException e) {
+			logger.error("run() - get file info from "
+					+ ftpinfo.getLocalpath() + " time out, e= " + e, e); //$NON-NLS-1$
+			
+			Stat.update_ThreadStatus(ftpinfo.getPid(), false); //记录本线程状态为异常
 		}
 		
 		//无待传文件，直接返回
@@ -82,11 +90,12 @@ public class FilePutThread extends Thread {
 			ReduceList.reduce_ListByTime(ftpfiles, ftpinfo.getSeconds());
 		}
 		
+		////将本地文件和传输日志进行对比，清理已上传项目
+		ReduceList.ReduceList_ByLog(localfiles, ftpinfo);
+		
 		
 		////将本地文件和FTP文件清单进行对比，清理已存在项目
 		diff = new ReduceList();
-		
-		
 		////上传业务且带重命名脚本
 		if(ftpinfo.getShellfile() != null) {
 			namefilter = diff.new NameFilter(ftpinfo.getShellfile(), ReduceList.get_NameList(localfiles));
@@ -95,7 +104,8 @@ public class FilePutThread extends Thread {
 				TimeoutController.execute(namefilter, 120000);
 			} catch(TimeoutException e) {
 				Stat.update_ThreadStatus(ftpinfo.getPid(), false); //记录本线程状态为异常
-				logger.error("run() - e=" + e, e); //$NON-NLS-1$
+				logger.error("run() - get rename file info from shell file "
+						+ ftpinfo.getShellfile() + " time out, e= " + e, e); //$NON-NLS-1$
 				return;
 			}
 			fileMap = namefilter.getFileNameMap();
@@ -116,7 +126,8 @@ public class FilePutThread extends Thread {
 				TimeoutController.execute(uploadT, uploadT.getTrans_period() * 1000);
 			} catch (TimeoutException e) {
 				Stat.update_ThreadStatus(ftpinfo.getPid(), false); //记录本线程状态为异常
-				logger.error("run() - e=" + e, e); //$NON-NLS-1$
+				logger.error("run() - upload file to  "
+						+ ftpinfo.getHost() + " time out, e= " + e, e); //$NON-NLS-1$
 				return;
 			}
 		}

@@ -663,4 +663,24 @@ public class FTPUtils {
 			return false;
 		}
     }
+    
+    
+    
+    /**
+     * 重命名FTP文件
+     * @param oldName，原文件名
+     * @param newname，更改后的文件名
+     * @return
+     */
+    public boolean rename(String oldName, String newname) {
+    	
+    	try {
+    		boolean value =  ftp.rename(oldName, newname);
+    		return value;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
+    }
 }

@@ -6,13 +6,14 @@ import java.util.List;
 
 import org.apache.commons.net.ftp.FTPFile;
 
+
 public class Mytest {
 
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
 //		FTPUtils ftpclient = new FTPUtils();
 //		ftpclient.connect("10.16.13.196", 21, "getdata", "getdata123", false, true);
-////		FTPUtils.connect(host, port, user, password, isTextMode, isPassiveMode);
+//		FTPUtils.connect(host, port, user, password, isTextMode, isPassiveMode);
 //		
 //		if(!ftpclient.setWorkingDirectory("/hfdata/data/Micaps/citylist/citydata/ddata")) {
 ////			Stat.update_ThreadStatus(ftpinfo.getPid(), false); //记录本线程状态为异常
@@ -85,13 +86,18 @@ public class Mytest {
 //			System.out.println(sections[i]);
 //		}
 		
-		String test = "\"1234***345**qw*\"ert*";
-		String[] t1 = test.split("\"");
+//		String test = "\"1234***345**qw*\"ert*";
+//		String[] t1 = test.split("\"");
+//		
+//		for(int i = 0; i < t1.length; i++ ) {
+//			System.out.println(t1[i]);
+//			System.out.println(t1.length);
+//		}
 		
-		for(int i = 0; i < t1.length; i++ ) {
-			System.out.println(t1[i]);
-			System.out.println(t1.length);
-		}
+		
+//		String logpath = ((FileAppender)Logger.getRootLogger().getAppender("logFile")).getFile();
+//		
+//		System.out.println(logpath);
 	}
 
 }

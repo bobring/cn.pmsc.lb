@@ -59,8 +59,12 @@ public class App {
 				try {
 					ftpinfo = new FtpInfo(line.trim(), i, Parent_Path);
 
-					if (logger.isInfoEnabled()) {
-						logger.info("Formatted paras of ftp Thread: " + ftpinfo.toString()); //$NON-NLS-1$
+//					if (logger.isInfoEnabled()) {
+//						logger.info("Formatted paras of ftp Thread: " + ftpinfo.toString()); //$NON-NLS-1$
+//					}
+					
+					if (logger.isDebugEnabled()) {
+						logger.debug("Formatted paras of ftp Thread: " + ftpinfo.toString()); //$NON-NLS-1$
 					}
 					
 //					FTPCompleteThread ct = new FTPCompleteThread(ftpinfo);
@@ -68,6 +72,7 @@ public class App {
 					if(ftpinfo.getType().toLowerCase().contains("download")) {
 						exec.submit(new FileGetThread(ftpinfo));
 					} else if(ftpinfo.getType().toLowerCase().contains("upload")) {
+						FtpLog.init_log(); //读取FTP上传日志
 						exec.submit(new FilePutThread(ftpinfo));
 					} else {
 						Stat.add_invalidArg(); //统计不正确参数行

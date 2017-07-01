@@ -17,6 +17,7 @@ public class FtpInfo {
     private final String ftp_wildcard;		//FTP文件的文件名通配符
     private final boolean isTextMode;		//文件传输模式，true为文本模式，false为二进制模式
     private final boolean isPassiveMode;	//FTP连接模式，true为被动模式，false为主动模式
+    private boolean feature_mfmt = true;	//是否支持FTP命令mfmt，更改FTP文件的修改时间，初始化默认为true
     
     private final String shellfile;			//可能存在的文件名过滤脚本
     
@@ -184,6 +185,7 @@ public class FtpInfo {
 			
 			this.pid = pid;
 			
+//			this.feature_mfmt = true;
 		} else if (this.paras_num >= paras_num_min - 2 && paras_num_min > 2) {
 //			//统计错误参数，数量只少了2个以内，认为是用户输入错误
 			throw new IllegalArgumentException("Invalid number "
@@ -274,6 +276,16 @@ public class FtpInfo {
 		}
 	}
 	
+	public boolean is_Feature_mfmt() {
+		return feature_mfmt;
+	}
+
+
+	public void set_Feature_mfmt(boolean feature_mfmt) {
+		this.feature_mfmt = feature_mfmt;
+	}
+
+
 	@Override
 	public String toString() {
 		return type + " " + seconds + " " + localpath + " " + local_wildcard

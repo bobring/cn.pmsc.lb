@@ -325,4 +325,33 @@ public class ReduceList {
 			}
 		}
 	}
+	
+	
+	/**
+	 * 清理待上传文件中的已上传部分，
+	 * 根据文件名，文件大小，修改时间，FTP地址，FTP上传路径等5项参数判断
+	 * 5项参数都存在，才认为文件已上传
+	 * @param localfiles
+	 * @param ftpinfo
+	 */
+	public static void ReduceList_ByLog(List<File> list, FtpInfo ftpinfo) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("ReduceList_ByLog() - before reduce, "
+					+ list.size() + " files counted."); //$NON-NLS-1$
+		}
+
+		for (Iterator<File> it = list.iterator(); it.hasNext() 
+				&& !list.isEmpty();) {
+			File f = (File) it.next();
+			if (FtpLog.search(f.getAbsolutePath(), Long.toString(f.length()), 
+					Long.toString(f.lastModified()), ftpinfo.getHost(), ftpinfo.getFtppath() )) {
+				it.remove();
+			}
+		}
+		
+		if (logger.isDebugEnabled()) {
+			logger.debug("ReduceList_ByLog() - after reduce, "
+					+ list.size() + " files left."); //$NON-NLS-1$
+		}
+	}
 }

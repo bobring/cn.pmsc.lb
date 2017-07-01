@@ -32,6 +32,29 @@ public class LocalFileUtils {
 		}
 	}
 	
+	
+	public static List<String> readfile(String filepath, String keywords) throws IOException {
+
+		File file = new File(filepath);
+
+		if (file.exists() && file.isFile()) {
+			List<String> buf = new ArrayList<String>();
+
+			br = new BufferedReader(new FileReader(file));
+			String line;
+
+			while ((line = br.readLine()) != null) {
+				if(line.contains(keywords)) {
+					buf.add(line);
+				}
+			}
+
+			return buf;
+		} else {
+			throw new IOException("not a regular file or does not exist: " + filepath);
+		}
+	}
+	
 	public static String get_ParentDir(String filepath) {
 		File file = new File(filepath);
 		

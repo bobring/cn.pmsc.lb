@@ -97,43 +97,73 @@ public class FTPUploadThread extends Thread {
 				try {
 					if (fileMap != null && fileMap.containsKey(f.getName())) {
 						String newname = fileMap.get(f.getName());
-						ftpclient.upload(newname, f);
-						
-						Stat.add_filesSuccess(); //统计传输成功的文件数
-						
-						if (logger.isInfoEnabled()) {
-							logger.info("uploading file: " + f.getAbsolutePath() 
-							+ " -> " + ftpinfo.getHost() + ":" 
-							+ MyString.filepath(ftpinfo.getFtppath(), newname)); //$NON-NLS-1$
+						String tmpname = newname + ".tmp";
+						ftpclient.upload(tmpname, f);
+						//临时文件名.tmp重命名
+						if(!ftpclient.rename(tmpname, newname)) {
+							logger.error("failed to rename " + tmpname
+									+ " to " + newname + " in " 
+									+ ftpinfo.getHost() + ":" + ftpinfo.getFtppath());
+							
+							Stat.add_filesFailed(); //记录传输失败文件数，传输成功但重命名失败也认为是失败
+						} else {
+							Stat.add_filesSuccess(); //统计传输成功的文件数
+							
+							if (logger.isInfoEnabled()) {
+								logger.info("uploading file: " + f.getAbsolutePath() 
+								+ " ( filesize: " + f.length() + " , mtime: " + f.lastModified()
+								+ " ) -> " + ftpinfo.getHost() + ":" 
+								+ MyString.filepath(ftpinfo.getFtppath(), newname)); //$NON-NLS-1$
+							}
+							
+							//设置目标文件的修改时间与源文件一致
+							if(ftpinfo.is_Feature_mfmt() 
+									&& !ftpclient.set_ModifyTime(newname, f.lastModified())) {
+								ftpinfo.set_Feature_mfmt(false);
+								
+								logger.warn("failed to set modify time "
+										+ "of file: " + ftpinfo.getHost() + ":" 
+										+ MyString.filepath(ftpinfo.getFtppath(), newname)
+										+ " , FTP server may not support mfmt command, stop trying.", 
+										(Object) null); //$NON-NLS-1$
+							}
 						}
-						//设置目标文件的修改时间与源文件一致
-						if(!ftpclient.set_ModifyTime(newname, f.lastModified())) {
-							logger.warn("failed to set modify time "
-									+ "of file: " + ftpinfo.getHost() + ":" 
-									+ MyString.filepath(ftpinfo.getFtppath(), newname), 
-									(Object) null); //$NON-NLS-1$
-						}
+						
 					} else if(fileMap != null) {
 						//文件名被脚本过滤，认为是非业务所需文件
 						logger.warn("file: " + f.getAbsolutePath() + 
 							" has no target name, will not be uploaded.", (Object) null); //$NON-NLS-1$
 					} else {
-						ftpclient.upload(f.getName(), f);
-						
-						Stat.add_filesSuccess(); //统计传输成功的文件数
-						
-						if (logger.isInfoEnabled()) {
-							logger.info("uploading file: " + f.getAbsolutePath() 
-							+ " -> " + ftpinfo.getHost() + ":" 
-							+ MyString.filepath(ftpinfo.getFtppath(), f.getName())); //$NON-NLS-1$
-						}
-						
-						//设置目标文件的修改时间与源文件一致
-						if(!ftpclient.set_ModifyTime(f.getName(), f.lastModified())) {
-							logger.warn("failed to set modify time "
-									+ "of file: " + ftpinfo.getHost() + ":" 
-									+ MyString.filepath(ftpinfo.getFtppath(), f.getName()), 
-									(Object) null); //$NON-NLS-1$
+						String tmpname = f.getName() + ".tmp";
+						ftpclient.upload(tmpname, f);
+						//临时文件名.tmp重命名
+						if(!ftpclient.rename(tmpname, f.getName())) {
+							logger.error("failed to rename " + tmpname
+									+ " to " + f.getName() + " in " 
+									+ ftpinfo.getHost() + ":" + ftpinfo.getFtppath());
+							
+							Stat.add_filesFailed(); //记录传输失败文件数，传输成功但重命名失败也认为是失败
+						} else {
+							Stat.add_filesSuccess(); //统计传输成功的文件数
+							
+							if (logger.isInfoEnabled()) {
+								logger.info("uploading file: " + f.getAbsolutePath() 
+								+ " ( filesize: " + f.length() + " , mtime: " + f.lastModified()
+								+ " ) -> " + ftpinfo.getHost() + ":" 
+								+ MyString.filepath(ftpinfo.getFtppath(), f.getName())); //$NON-NLS-1$
+							}
+							
+							//设置目标文件的修改时间与源文件一致
+							if(ftpinfo.is_Feature_mfmt() 
+									&& !ftpclient.set_ModifyTime(f.getName(), f.lastModified())) {
+								ftpinfo.set_Feature_mfmt(false);
+								
+								logger.warn("failed to set modify time "
+										+ "of file: " + ftpinfo.getHost() + ":" 
+										+ MyString.filepath(ftpinfo.getFtppath(), f.getName())
+										+ " , FTP server may not support mfmt command, stop trying.",  
+										(Object) null); //$NON-NLS-1$
+							}
 						}
 					}
 				} catch(IOException e) {
