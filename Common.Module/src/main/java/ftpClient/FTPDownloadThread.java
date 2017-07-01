@@ -114,46 +114,67 @@ public class FTPDownloadThread extends Thread {
 			}
 			
 			File localfile;
+			File tmpfile;
 			//切换本地目录
 //			runtime.exec(cmd);
-			//逐个上传文件
+			//逐个下载文件
 			for(FTPFile f: filelist) {
 				try {
 					if (fileMap != null && fileMap.containsKey(f.getName())) {
 						String newname = MyString.filepath(ftpinfo.getLocalpath(), fileMap.get(f.getName()));
+						String tmpname = newname + ".tmp";
+						tmpfile = new File(tmpname);
+						ftpclient.download(f.getName(), tmpfile);
+						
 						localfile = new File(newname);
-						ftpclient.download(f.getName(), localfile);
-						
-						Stat.add_filesSuccess(); //统计传输成功的文件数
-						
-						if (logger.isInfoEnabled()) {
-							logger.info("downloading file: " + ftpinfo.getHost() 
-							+ ":" + MyString.filepath(ftpinfo.getFtppath(), f.getName()) 
-							+ " -> " + localfile.getAbsolutePath()); //$NON-NLS-1$
+						if(!tmpfile.renameTo(localfile)) {
+							logger.error("failed to rename " + tmpname
+									+ " to " + newname);
+							
+							Stat.add_filesFailed(); //记录传输失败文件数
+						} else {
+							Stat.add_filesSuccess(); // 统计传输成功的文件数
+
+							if (logger.isInfoEnabled()) {
+								logger.info("downloading file: " + ftpinfo.getHost() + ":"
+										+ MyString.filepath(ftpinfo.getFtppath(), f.getName()) + " -> " //$NON-NLS-1$
+										+ localfile.getAbsolutePath());
+							}
+							// 设置目标文件的修改时间与源文件一致
+							if (!localfile.setLastModified(f.getTimestamp().getTimeInMillis())) {
+								logger.warn("failed to set modify time " + "of file: " + localfile.getAbsolutePath(), //$NON-NLS-2$
+										(Object) null);
+							}
 						}
-						//设置目标文件的修改时间与源文件一致
-						if(!localfile.setLastModified(f.getTimestamp().getTimeInMillis())) {
-							logger.warn("failed to set modify time "
-									+ "of file: " + localfile.getAbsolutePath(), (Object)null); //$NON-NLS-1$
-						}
+						
 					} else if(fileMap != null) {
 						//文件名被脚本过滤，认为是非业务所需文件
 						logger.warn("file: " + f.getName() + 
 							" has no target name, will not be downloaded."); //$NON-NLS-1$
 					} else {
-						localfile = new File(MyString.filepath(ftpinfo.getLocalpath(), f.getName()));
-						ftpclient.download(f.getName(), localfile);
+						String newname = MyString.filepath(ftpinfo.getLocalpath(), f.getName());
+						String tmpname = newname + ".tmp";
+						tmpfile = new File(tmpname);
+						ftpclient.download(f.getName(), tmpfile);
 						
-						Stat.add_filesSuccess(); //统计传输成功的文件数
-						
-						if (logger.isInfoEnabled()) {
-							logger.info("downloading file: " + ftpinfo.getHost() 
-							+ ":" + MyString.filepath(ftpinfo.getFtppath(), f.getName()) 
-							+ " -> " + localfile.getAbsolutePath()); //$NON-NLS-1$
-						}
-						//设置目标文件的修改时间与源文件一致
-						if(!localfile.setLastModified(f.getTimestamp().getTimeInMillis())) {
-							logger.warn("failed to set modify time of file: " + localfile.getAbsolutePath(), (Object)null); //$NON-NLS-1$
+						localfile = new File(newname);
+						if(!tmpfile.renameTo(localfile)) {
+							logger.error("failed to rename " + tmpname
+									+ " to " + f.getName());
+							
+							Stat.add_filesFailed(); //记录传输失败文件数
+						} else {
+							Stat.add_filesSuccess(); //统计传输成功的文件数
+							
+							if (logger.isInfoEnabled()) {
+								logger.info("downloading file: " + ftpinfo.getHost() 
+								+ ":" + MyString.filepath(ftpinfo.getFtppath(), f.getName()) 
+								+ " -> " + localfile.getAbsolutePath()); //$NON-NLS-1$
+							}
+							//设置目标文件的修改时间与源文件一致
+							if(!localfile.setLastModified(f.getTimestamp().getTimeInMillis())) {
+								logger.warn("failed to set modify time of file: " + localfile.getAbsolutePath(), (Object)null); //$NON-NLS-1$
+							}
 						}
 					}
 				} catch(IOException e) {
